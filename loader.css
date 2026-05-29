@@ -1,0 +1,126 @@
+/* ===== LOADER STYLES ===== */
+
+/* Spinning ring — Windows 11 style */
+@keyframes w11spin {
+  0%   { transform: rotate(0deg);   stroke-dashoffset: 150; }
+  50%  { stroke-dashoffset: 30; }
+  100% { transform: rotate(360deg); stroke-dashoffset: 150; }
+}
+
+@keyframes w11fade {
+  0%, 100% { opacity: 0.15; }
+  50%       { opacity: 1; }
+}
+
+.w11-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.w11-spinner svg {
+  animation: w11spin 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.w11-spinner svg circle {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 157;
+  stroke-dashoffset: 150;
+}
+
+/* Button loading state */
+.btn-loading {
+  pointer-events: none;
+  opacity: 0.82;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 10px;
+  cursor: not-allowed !important;
+}
+
+.btn-loading .btn-text { opacity: 0.85; }
+
+/* Full page overlay loader */
+.page-loader {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.page-loader.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.page-loader .w11-spinner {
+  width: 52px;
+  height: 52px;
+}
+
+.page-loader .w11-spinner svg {
+  animation: w11spin 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.page-loader p {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1a6bff;
+  letter-spacing: 0.02em;
+  animation: w11fade 1.6s ease-in-out infinite;
+}
+
+/* Inline skeleton shimmer (for grids/tables loading) */
+.sk-row {
+  height: 18px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eef2f9 25%, #dce6f7 50%, #eef2f9 75%);
+  background-size: 300% 100%;
+  animation: skShimmer 1.4s ease infinite;
+  margin-bottom: 10px;
+}
+
+.sk-row.short  { width: 55%; }
+.sk-row.medium { width: 75%; }
+.sk-row.full   { width: 100%; }
+
+@keyframes skShimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* Small inline spinner for links / subtle loading */
+.link-loading {
+  pointer-events: none;
+  opacity: 0.6;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.link-loading::after {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: w11spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
