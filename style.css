@@ -196,11 +196,79 @@ input, select, textarea { font-family: var(--font); }
 .footer .container { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 0.83rem; }
 
 /* ===== RESPONSIVE ===== */
+
+/* Prevent horizontal overflow on ALL screens */
+html, body { overflow-x: hidden; width: 100%; }
+
 @media (max-width: 768px) {
+
+  /* ── Navbar ── */
+  .nav-inner { padding: 0 14px; height: 56px; }
+  .brand { font-size: 1.05rem; }
+  .nav-links { gap: 10px; font-size: 0.8rem; }
+  .nav-links > a:not(:last-child) { display: none; } /* hide Home/Shop on mobile */
+  #authArea { display: flex; align-items: center; gap: 6px; }
+  #authArea a { font-size: 0.78rem; }
+  #authArea .btn-primary { padding: 6px 12px; font-size: 0.78rem; }
+  #authArea .btn-outline { padding: 5px 10px; font-size: 0.78rem; }
+
+  /* ── Hero ── */
+  .hero { flex-direction: column; text-align: center; padding: 40px 16px 50px; gap: 28px; }
+  .hero-content { max-width: 100%; }
+  .hero-content h1 { font-size: 1.8rem; }
+  .hero-content p { font-size: 0.92rem; }
+  .hero-float { align-items: center; width: 100%; }
+  .float-card { min-width: unset; width: 100%; max-width: 300px; font-size: 0.88rem; padding: 12px 18px; }
+
+  /* ── Filter bar ── */
+  .filter-bar .container { flex-direction: column; gap: 10px; }
+  .filter-bar input, .filter-bar select { width: 100%; min-width: unset; }
+
+  /* ── Accounts grid ── */
+  .accounts-grid { grid-template-columns: 1fr; gap: 16px; }
+  .accounts-section { padding: 30px 0 50px; }
+  .section-title { font-size: 1.3rem; }
+
+  /* ── Account card ── */
+  .card-footer { flex-wrap: wrap; gap: 10px; }
+
+  /* ── Cart ── */
   .cart-layout { grid-template-columns: 1fr; }
-  .dash-layout { grid-template-columns: 1fr; }
-  .hero { flex-direction: column; text-align: center; padding: 60px 20px; }
-  .hero-float { align-items: center; }
-  .auth-card { padding: 32px 24px; }
+  .cart-item { flex-wrap: wrap; gap: 12px; }
+  .cart-item > div:last-child { flex-wrap: wrap; gap: 8px; width: 100%; }
+
+  /* ── Checkout ── */
+  .cart-layout { gap: 16px; }
+
+  /* ── Dashboard ── */
+  .dash-layout { grid-template-columns: 1fr; gap: 16px; }
+  .dash-sidebar { display: flex; overflow-x: auto; border-radius: var(--radius); }
+  .dash-sidebar a { border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; padding: 12px 16px; }
+  .dash-sidebar a:hover, .dash-sidebar a.active { border-left-color: transparent; border-bottom-color: var(--blue); }
+  .dash-content { padding: 20px 16px; }
+  .purchase-table { font-size: 0.78rem; }
+  .purchase-table th, .purchase-table td { padding: 8px 10px; }
+
+  /* ── Auth cards ── */
+  .auth-card { padding: 28px 18px; margin: 0 4px; }
   .form-row { flex-direction: column; gap: 0; }
+  .otp-inputs input { width: 40px; height: 46px; font-size: 1.1rem; }
+
+  /* ── Modal ── */
+  .modal-box { padding: 28px 20px; }
+
+  /* ── Page section ── */
+  .page-section { padding: 30px 0 50px; }
+  .page-title { font-size: 1.4rem; }
+
+  /* ── Footer ── */
+  .footer .container { flex-direction: column; text-align: center; gap: 6px; }
+}
+
+@media (max-width: 380px) {
+  .nav-inner { padding: 0 10px; }
+  .brand { font-size: 0.95rem; }
+  .hero-content h1 { font-size: 1.5rem; }
+  .otp-inputs { gap: 6px; }
+  .otp-inputs input { width: 36px; height: 42px; }
 }
