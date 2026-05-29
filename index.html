@@ -1,89 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Social Accounts Marketplace</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SocialVault — Premium Social Media Accounts</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@300;400;600&display=swap" rel="stylesheet" />
 </head>
 <body>
-  <header>
-    <div class="logo">SocialMarket</div>
-    <div>
-      <button class="nav-btn secondary" id="loginBtn">Login</button>
-      <button class="nav-btn" id="signupBtn">Sign Up</button>
-      <button class="nav-btn" id="dashboardLink" style="display:none;" onclick="window.location.href='dashboard.html'">Dashboard</button>
-    </div>
-  </header>
-
-  <div class="container">
-    <h2>Available Accounts</h2>
-    <div id="accountsGrid" class="grid"></div>
-
-    <div class="cart-section" id="cartSection" style="display:none;">
-      <h3>🛒 Your Cart</h3>
-      <div id="cartItems"></div>
-      <div style="display:flex; justify-content:space-between; margin-top:1rem; align-items:center;">
-        <span id="cartTotal">Total: $0.00</span>
-        <button class="btn primary" id="checkoutBtn" onclick="initiateCheckout()">Proceed to Checkout</button>
+  <!-- Privacy Policy Modal (shown on first visit) -->
+  <div id="privacyModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-logo">🔒 SocialVault</div>
+      <h2>Terms & Legal Notice</h2>
+      <div class="modal-scroll">
+        <p><strong>Please read carefully before proceeding.</strong></p>
+        <p>Welcome to SocialVault. By accessing this platform, you agree to the following terms:</p>
+        <h4>1. Legal Use Only</h4>
+        <p>All accounts sold on SocialVault are owned and legitimately transferred by us. You agree to use any purchased account strictly for lawful purposes in accordance with the laws of your jurisdiction and the platform's terms of service.</p>
+        <h4>2. Buyer Responsibility</h4>
+        <p>Any illegal, fraudulent, or harmful use of accounts purchased from SocialVault — including but not limited to scamming, impersonation, spamming, or any criminal activity — is solely the responsibility of the buyer. SocialVault shall bear no liability whatsoever for any misuse.</p>
+        <h4>3. No Refund on Delivered Credentials</h4>
+        <p>Once account credentials have been delivered to you after a confirmed payment, no refund will be issued. Ensure you verify your order before completing payment.</p>
+        <h4>4. Age Restriction</h4>
+        <p>You must be at least 18 years of age to purchase from this platform. By continuing, you confirm you meet this requirement.</p>
+        <h4>5. Account Warranty</h4>
+        <p>We warrant that all credentials provided are accurate at the time of sale. We are not responsible for any changes made to the account after delivery.</p>
+        <h4>6. Privacy</h4>
+        <p>Your personal data (email, name, phone) is stored securely and never sold to third parties. It is used solely for order fulfillment and account management.</p>
       </div>
-      <div class="tnc-checkbox">
-        <input type="checkbox" id="tncAgree" required>
-        <label>By continuing you agree to our <span class="tnc-link" onclick="openTncModal()">Terms & Conditions</span></label>
+      <label class="agree-check">
+        <input type="checkbox" id="agreeCheck" /> I have read and agree to the Terms & Legal Notice
+      </label>
+      <button class="btn-primary" id="agreeBtn" disabled>Enter SocialVault</button>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">⚡ SocialVault</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="#accounts">Shop</a>
+        <span id="cartIcon" class="cart-icon" onclick="window.location='cart.html'">
+          🛒 <span id="cartCount">0</span>
+        </span>
+        <span id="authArea"></span>
       </div>
     </div>
-  </div>
+  </nav>
 
-  <!-- T&C Modal -->
-  <div class="modal" id="tncModal">
-    <div class="modal-box">
-      <div class="modal-header"><h3>Terms & Conditions</h3><button class="close" onclick="closeModal('tncModal')">&times;</button></div>
-      <p><strong>Legal Notice:</strong> All accounts sold are strictly for lawful, ethical, and platform-compliant usage. Any illegal, fraudulent, or unauthorized use of purchased credentials is strictly prohibited and punishable by law. The seller assumes zero liability for misuse. By purchasing, you confirm you are 18+ and will comply with all applicable regulations.</p>
-      <button class="btn primary" onclick="closeModal('tncModal')" style="margin-top:1rem;">I Understand</button>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <span class="hero-badge">✦ Verified Accounts</span>
+      <h1>Premium Social Media<br /><span class="accent">Accounts for Sale</span></h1>
+      <p>Instantly acquire aged, high-follower social media accounts. Verified. Secure. Delivered immediately after payment.</p>
+      <a href="#accounts" class="btn-primary">Browse Accounts</a>
     </div>
-  </div>
-
-  <!-- Auth Modals -->
-  <div class="modal" id="loginModal">
-    <div class="modal-box">
-      <div class="modal-header"><h3>Login</h3><button class="close" onclick="closeModal('loginModal')">&times;</button></div>
-      <input type="email" id="loginEmail" placeholder="Email" class="form-group">
-      <input type="password" id="loginPassword" placeholder="Password" class="form-group">
-      <button class="btn primary" id="loginAction" style="width:100%;">Login</button>
-      <p style="text-align:center; margin-top:0.5rem; font-size:0.85rem;">Forgot password? <span class="tnc-link" onclick="closeModal('loginModal'); openForgotModal()">Reset</span></p>
+    <div class="hero-float">
+      <div class="float-card">📘 Facebook · 5.2K followers</div>
+      <div class="float-card pink">📸 Instagram · 12K followers</div>
+      <div class="float-card teal">🎵 TikTok · 8.5K followers</div>
     </div>
-  </div>
+  </section>
 
-  <div class="modal" id="signupModal">
-    <div class="modal-box">
-      <div class="modal-header"><h3>Create Account</h3><button class="close" onclick="closeModal('signupModal')">&times;</button></div>
-      <input type="text" id="signupName" placeholder="Full Name" class="form-group">
-      <input type="email" id="signupEmail" placeholder="Email" class="form-group">
-      <input type="password" id="signupPassword" placeholder="Password (min 8)" class="form-group">
-      <input type="date" id="signupDob" class="form-group">
-      <input type="tel" id="signupPhone" placeholder="Phone (optional)" class="form-group">
-      <button class="btn primary" id="signupAction" style="width:100%;">Sign Up & Verify</button>
+  <!-- FILTERS -->
+  <section class="filter-bar" id="accounts">
+    <div class="container">
+      <input type="text" id="searchInput" placeholder="🔍  Search platform or country..." />
+      <select id="platformFilter">
+        <option value="">All Platforms</option>
+      </select>
+      <select id="countryFilter">
+        <option value="">All Countries</option>
+      </select>
     </div>
-  </div>
+  </section>
 
-  <div class="modal" id="otpModal">
-    <div class="modal-box">
-      <div class="modal-header"><h3>Enter OTP</h3><button class="close" onclick="closeModal('otpModal')">&times;</button></div>
-      <p>Check your email for the verification code.</p>
-      <input type="text" id="otpInput" placeholder="6-digit OTP" class="form-group">
-      <button class="btn primary" id="verifyOtp" style="width:100%;">Verify</button>
+  <!-- ACCOUNTS GRID -->
+  <section class="accounts-section">
+    <div class="container">
+      <h2 class="section-title">Available Accounts</h2>
+      <div id="accountsGrid" class="accounts-grid">
+        <div class="loading-cards">
+          <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <div class="modal" id="forgotModal">
-    <div class="modal-box">
-      <div class="modal-header"><h3>Reset Password</h3><button class="close" onclick="closeModal('forgotModal')">&times;</button></div>
-      <input type="email" id="forgotEmail" placeholder="Registered Email" class="form-group">
-      <button class="btn primary" id="resetAction" style="width:100%;">Send Reset Link</button>
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <span>⚡ SocialVault &copy; 2025 — Premium Social Accounts</span>
+      <span>All sales are final. Legal use only.</span>
     </div>
-  </div>
+  </footer>
 
-  <script type="module" src="js/app.js"></script>
-  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <!-- TOAST -->
+  <div id="toast" class="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+  <script src="cart.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
