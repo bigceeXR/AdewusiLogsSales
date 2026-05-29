@@ -39,7 +39,7 @@ async function loadPurchases() {
       <div style="text-align:center;padding:40px 0;color:var(--gray-500)">
         <div style="font-size:3rem;margin-bottom:12px">📭</div>
         <p>No purchases yet.</p>
-        <a href="index.html" class="btn-primary" style="margin-top:16px;display:inline-block">Browse Accounts</a>
+        <a href="/" class="btn-primary" style="margin-top:16px;display:inline-block">Browse Accounts</a>
       </div>`;
     return;
   }

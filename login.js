@@ -58,7 +58,7 @@ async function verifyOtp() {
 
   // Redirect to previous page or index
   const params = new URLSearchParams(window.location.search);
-  window.location.href = params.get('redirect') || 'index.html';
+  window.location.href = params.get('redirect') || '/';
 }
 
 async function resendOtp() {

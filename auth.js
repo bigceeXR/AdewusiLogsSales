@@ -29,7 +29,7 @@ async function renderAuthArea() {
       <button class="btn-outline" onclick="signOut()" style="padding:6px 16px">Sign Out</button>`;
   } else {
     el.innerHTML = `
-      <a href="login.html" style="color:var(--gray-700);font-weight:600">Login</a>
+      <a href="login" style="color:var(--gray-700);font-weight:600">Login</a>
       <a href="signup.html" class="btn-primary" style="padding:8px 18px">Sign Up</a>`;
   }
 }
@@ -37,14 +37,14 @@ async function renderAuthArea() {
 async function signOut() {
   await sb.auth.signOut();
   localStorage.removeItem('sv_cart');
-  window.location.href = 'index.html';
+  window.location.href = '/';
 }
 
 // Guard: redirect to login if not authenticated
 async function requireAuth() {
   const user = await getUser();
   if (!user) {
-    window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+    window.location.href = 'login?redirect=' + encodeURIComponent(window.location.href);
     return null;
   }
   return user;

@@ -41,7 +41,7 @@ async function startSignup() {
   // Sign up via Supabase auth — will send OTP (magic link / OTP email)
   const { error } = await sb.auth.signUp({
     email, password,
-    options: { emailRedirectTo: window.location.origin + '/index.html' }
+    options: { emailRedirectTo: window.location.origin + '//' }
   });
 
   if (error) return showErr('errMsg', error.message);
@@ -92,7 +92,7 @@ async function verifyOtp() {
     });
   }
 
-  window.location.href = 'index.html';
+  window.location.href = '/';
 }
 
 async function resendOtp() {
