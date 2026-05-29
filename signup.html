@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up — SocialVault</title>
+  <script src="/env.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@300;400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">⚡ SocialVault</a>
+    </div>
+  </nav>
+
+  <div class="auth-page">
+    <div class="auth-card">
+      <h2>Create Account</h2>
+      <p class="sub">Join SocialVault to purchase premium social accounts</p>
+
+      <div id="step1">
+        <div id="errMsg" class="error-msg"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="firstName" placeholder="John" />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="lastName" placeholder="Doe" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="email" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="phone" placeholder="+234 800 000 0000" />
+        </div>
+        <div class="form-group">
+          <label>Date of Birth <span style="color:var(--gray-500);font-weight:400">(must be 18+)</span></label>
+          <input type="date" id="dob" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Min. 8 characters" />
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="confirmPassword" placeholder="Repeat password" />
+        </div>
+        <button class="btn-primary" onclick="startSignup()">Continue →</button>
+        <div class="auth-switch">Already have an account? <a href="login.html">Sign in</a></div>
+      </div>
+
+      <div id="step2" style="display:none">
+        <p style="margin-bottom:20px;color:var(--gray-700)">We sent a 6-digit OTP to <strong id="otpEmail"></strong>. Enter it below to verify your account.</p>
+        <div id="errMsg2" class="error-msg"></div>
+        <div class="otp-inputs" id="otpInputs">
+          <input maxlength="1" /><input maxlength="1" /><input maxlength="1" />
+          <input maxlength="1" /><input maxlength="1" /><input maxlength="1" />
+        </div>
+        <button class="btn-primary" onclick="verifyOtp()">Verify & Create Account</button>
+        <p style="text-align:center;margin-top:14px;font-size:0.85rem;color:var(--gray-500)">
+          Didn't receive it? <a href="#" onclick="resendOtp()" style="color:var(--blue);font-weight:700">Resend OTP</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+  <script src="signup.js"></script>
+</body>
+</html>

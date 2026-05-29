@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — SocialVault</title>
+  <script src="/env.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@300;400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">⚡ SocialVault</a>
+      <div class="nav-links">
+        <a href="index.html">Shop</a>
+        <span id="cartIcon" class="cart-icon" onclick="window.location='cart.html'">🛒 <span id="cartCount">0</span></span>
+        <button class="btn-outline" onclick="signOut()" style="padding:6px 16px">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Payment success banner -->
+  <div id="successBanner" style="display:none;background:var(--green);color:#fff;text-align:center;padding:14px;font-weight:700;font-size:0.95rem">
+    ✅ Payment successful! Your account credentials are now available below.
+  </div>
+
+  <div class="container page-section">
+    <div class="dash-layout">
+
+      <!-- Sidebar -->
+      <div class="dash-sidebar">
+        <a href="#purchases" class="active" onclick="showTab('purchases',this)">📦 My Purchases</a>
+        <a href="#profile" onclick="showTab('profile',this)">👤 My Profile</a>
+      </div>
+
+      <!-- Main content -->
+      <div class="dash-content">
+
+        <!-- Purchases Tab -->
+        <div id="tab-purchases">
+          <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:20px">My Purchases</h3>
+          <div id="purchasesContent">Loading...</div>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="tab-profile" style="display:none">
+          <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:20px">My Profile</h3>
+          <div id="errMsgP" class="error-msg"></div>
+          <div id="successMsgP" style="display:none;background:#dcfce7;color:var(--green);border-radius:8px;padding:10px 14px;font-size:0.85rem;margin-bottom:16px"></div>
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="pName" placeholder="Your full name" />
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="pEmail" disabled style="background:var(--gray-100)" />
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="pPhone" placeholder="+234 800 000 0000" />
+          </div>
+          <div class="form-group">
+            <label>Date of Birth</label>
+            <input type="date" id="pDob" disabled style="background:var(--gray-100)" />
+          </div>
+          <button class="btn-primary" onclick="saveProfile()">Save Changes</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+  <script src="cart.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

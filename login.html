@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — SocialVault</title>
+  <script src="/env.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@300;400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">⚡ SocialVault</a>
+    </div>
+  </nav>
+
+  <div class="auth-page">
+    <div class="auth-card">
+
+      <!-- Step 1: Email + Password -->
+      <div id="step1">
+        <h2>Welcome Back</h2>
+        <p class="sub">Sign in to your SocialVault account</p>
+        <div id="errMsg" class="error-msg"></div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="email" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Your password" />
+        </div>
+        <div style="text-align:right;margin-bottom:18px">
+          <a href="forgot.html" style="font-size:0.85rem;color:var(--blue);font-weight:600">Forgot password?</a>
+        </div>
+        <button class="btn-primary" onclick="doLogin()">Sign In</button>
+        <div class="auth-switch">New here? <a href="signup.html">Create an account</a></div>
+      </div>
+
+      <!-- Step 2: OTP verification -->
+      <div id="step2" style="display:none">
+        <h2>Verify It's You</h2>
+        <p class="sub">Enter the 6-digit OTP sent to <strong id="otpEmail"></strong></p>
+        <div id="errMsg2" class="error-msg"></div>
+        <div class="otp-inputs" id="otpInputs">
+          <input maxlength="1"/><input maxlength="1"/><input maxlength="1"/>
+          <input maxlength="1"/><input maxlength="1"/><input maxlength="1"/>
+        </div>
+        <button class="btn-primary" onclick="verifyOtp()">Verify & Continue</button>
+        <p style="text-align:center;margin-top:14px;font-size:0.85rem;color:var(--gray-500)">
+          Didn't receive it? <a href="#" onclick="resendOtp()" style="color:var(--blue);font-weight:700">Resend OTP</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+  <script src="login.js"></script>
+</body>
+</html>

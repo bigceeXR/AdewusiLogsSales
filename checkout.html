@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout — SocialVault</title>
+  <script src="/env.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@300;400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">⚡ SocialVault</a>
+      <div class="nav-links"><a href="cart.html">← Back to Cart</a></div>
+    </div>
+  </nav>
+
+  <div class="container page-section">
+    <h2 class="page-title">Checkout</h2>
+    <div class="cart-layout">
+
+      <!-- Left: Billing Info -->
+      <div>
+        <div class="dash-content" style="margin-bottom:24px">
+          <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:20px">Billing Details</h3>
+          <div id="billingInfo" style="font-size:0.92rem;color:var(--gray-700);line-height:1.8">
+            Loading...
+          </div>
+        </div>
+        <div class="dash-content">
+          <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:16px">Order Items</h3>
+          <div id="checkoutItems"></div>
+        </div>
+      </div>
+
+      <!-- Right: Pay -->
+      <div class="order-summary">
+        <h3>Payment</h3>
+        <div id="checkoutSummary"></div>
+        <div class="summary-row total" style="margin-top:8px">
+          <span>Total</span><span id="checkoutTotal" style="color:var(--blue)">$0.00</span>
+        </div>
+        <p style="font-size:0.75rem;color:var(--gray-500);margin:14px 0 6px;line-height:1.6">
+          By clicking "Pay Now" you agree to our
+          <a onclick="document.getElementById('termsModal').classList.remove('hidden')"
+            style="color:var(--blue);font-weight:600;cursor:pointer">terms and conditions</a>.
+          Credentials will be delivered immediately after payment confirmation.
+        </p>
+        <button class="btn-primary" id="payBtn" style="width:100%;padding:15px;font-size:1rem;margin-top:8px" onclick="initPaystack()">
+          🔒 Pay Now
+        </button>
+        <div style="text-align:center;margin-top:12px">
+          <img src="https://paystack.com/assets/img/logos/paystack-logo-white.png"
+               onerror="this.style.display='none'"
+               style="height:22px;opacity:0.5" alt="Secured by Paystack" />
+          <p style="font-size:0.75rem;color:var(--gray-500);margin-top:4px">Secured by Paystack</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Terms Modal -->
+  <div id="termsModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-logo">📋 Terms & Conditions</div>
+      <div class="modal-scroll">
+        <h4>1. Legal Use Only</h4>
+        <p>All accounts sold on SocialVault are legitimately owned and transferred by us. You agree to use any purchased account strictly for lawful purposes.</p>
+        <h4>2. Buyer Responsibility</h4>
+        <p>Any illegal, fraudulent, or harmful use — including scamming, impersonation, or criminal activity — is solely the buyer's responsibility. SocialVault bears no liability for misuse.</p>
+        <h4>3. No Refund on Delivered Credentials</h4>
+        <p>Once credentials have been delivered after confirmed payment, no refund will be issued.</p>
+        <h4>4. Age Restriction</h4>
+        <p>You must be at least 18 years of age to purchase.</p>
+        <h4>5. Account Warranty</h4>
+        <p>We warrant all credentials are accurate at time of sale. We are not responsible for changes made after delivery.</p>
+        <h4>6. Privacy</h4>
+        <p>Your personal data is stored securely and never sold to third parties.</p>
+      </div>
+      <button class="btn-primary" onclick="document.getElementById('termsModal').classList.add('hidden')">Close</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <!-- Paystack inline script -->
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+  <script src="cart.js"></script>
+  <script src="checkout.js"></script>
+</body>
+</html>

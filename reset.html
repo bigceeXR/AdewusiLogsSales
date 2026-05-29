@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reset Password — SocialVault</title>
+  <script src="/env.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@300;400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">⚡ SocialVault</a>
+    </div>
+  </nav>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div id="formArea">
+        <h2>Set New Password</h2>
+        <p class="sub">Choose a strong new password for your account.</p>
+        <div id="errMsg" class="error-msg"></div>
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" id="newPass" placeholder="Min. 8 characters" />
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password</label>
+          <input type="password" id="confirmPass" placeholder="Repeat password" />
+        </div>
+        <button class="btn-primary" onclick="doReset()">Update Password</button>
+      </div>
+      <div id="doneArea" style="display:none;text-align:center;padding:20px 0">
+        <div style="font-size:3rem;margin-bottom:16px">✅</div>
+        <h2>Password Updated!</h2>
+        <p class="sub" style="margin-top:8px">Your password has been changed. You can now sign in.</p>
+        <a href="login.html" class="btn-primary" style="margin-top:24px;display:inline-block">Go to Login</a>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    async function doReset() {
+      const np = document.getElementById('newPass').value;
+      const cp = document.getElementById('confirmPass').value;
+      const err = document.getElementById('errMsg');
+      err.classList.remove('show');
+      if (np.length < 8) { err.textContent = 'Password must be at least 8 characters.'; err.classList.add('show'); return; }
+      if (np !== cp) { err.textContent = 'Passwords do not match.'; err.classList.add('show'); return; }
+      const { error } = await sb.auth.updateUser({ password: np });
+      if (error) { err.textContent = error.message; err.classList.add('show'); return; }
+      document.getElementById('formArea').style.display = 'none';
+      document.getElementById('doneArea').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
