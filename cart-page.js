@@ -32,7 +32,7 @@ function renderCart() {
       <div style="font-size:2rem">${PLATFORM_ICONS[item.platform] || '🌐'}</div>
       <div class="cart-item-info">
         <h4>${item.platform} — ${item.country}</h4>
-        <p>$${parseFloat(item.price).toFixed(2)} × ${item.qty} account(s)</p>
+        <p>₦${parseFloat(item.price).toLocaleString()} × ${item.qty} account(s)</p>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
         <div class="qty-row">
@@ -40,7 +40,7 @@ function renderCart() {
           <span class="qty-display">${item.qty}</span>
           <button class="qty-btn" onclick="adjustQty('${item.id}',1,${item.maxQty})">+</button>
         </div>
-        <strong style="color:var(--blue);min-width:64px;text-align:right">$${(item.price * item.qty).toFixed(2)}</strong>
+        <strong style="color:var(--blue);min-width:64px;text-align:right">₦${(item.price * item.qty).toLocaleString()}</strong>
         <button class="cart-remove" onclick="removeItem('${item.id}')">✕ Remove</button>
       </div>
     </div>
@@ -49,11 +49,11 @@ function renderCart() {
   summaryRows.innerHTML = cart.map(item => `
     <div class="summary-row">
       <span>${item.platform} ×${item.qty}</span>
-      <span>$${(item.price * item.qty).toFixed(2)}</span>
+      <span>₦${parseFloat(item.price).toLocaleString()}</span>
     </div>
   `).join('');
 
-  document.getElementById('totalAmount').textContent = '$' + cartTotal();
+  document.getElementById('totalAmount').textContent = '₦' + parseFloat(cartTotal()).toLocaleString();
 }
 
 function adjustQty(id, delta, max = 99) {

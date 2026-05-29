@@ -62,7 +62,7 @@ async function loadPurchases() {
             <tr>
               <td>${ICONS[p.accounts?.platform] || '🌐'} ${p.accounts?.platform || '—'}</td>
               <td>${p.accounts?.country || '—'}</td>
-              <td>$${parseFloat(p.total_paid).toFixed(2)}</td>
+              <td>₦${parseFloat(p.total_paid).toLocaleString()}</td>
               <td>${new Date(p.purchased_at).toLocaleDateString()}</td>
               <td><span class="badge ${p.is_completed ? 'complete' : 'pending'}">${p.is_completed ? 'Completed' : 'Pending'}</span></td>
               <td>

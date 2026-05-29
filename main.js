@@ -94,7 +94,7 @@ function renderAccounts(accounts) {
         </div>
       </div>
       <div class="card-footer">
-        <div class="card-price">$${parseFloat(a.price_usd).toFixed(2)} <span>/ acc</span></div>
+        <div class="card-price">₦${parseFloat(a.price_ngn).toLocaleString()} <span>/ acc</span></div>
         <button class="btn-primary" style="padding:9px 18px;font-size:0.85rem"
           onclick='addToCart(${JSON.stringify(a)}, parseInt(document.getElementById("qty_${a.id}").textContent))'
           ${a.quantity_available < 1 ? 'disabled' : ''}>

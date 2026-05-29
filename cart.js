@@ -24,7 +24,7 @@ function addToCart(account, qty = 1) {
     cart[idx].qty = Math.min(cart[idx].qty + qty, account.quantity_available);
   } else {
     cart.push({ id: account.id, platform: account.platform, country: account.country,
-      price: account.price_usd, qty, maxQty: account.quantity_available });
+      price: account.price_ngn, qty, maxQty: account.quantity_available });
   }
   saveCart(cart);
   showToast(`${account.platform} added to cart ✓`, 'success');

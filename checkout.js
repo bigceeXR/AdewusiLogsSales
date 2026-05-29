@@ -47,7 +47,7 @@ function renderItems() {
     </div>
   `).join('');
 
-  document.getElementById('checkoutTotal').textContent = '$' + cartTotal();
+  document.getElementById('checkoutTotal').textContent = '₦' + parseFloat(cartTotal()).toLocaleString();
 }
 
 function initPaystack() {
@@ -58,7 +58,7 @@ function initPaystack() {
     key: PAYSTACK_PUBLIC_KEY,
     email: currentUser.email,
     amount: Math.round(total * 100),
-    currency: 'USD',
+    currency: 'NGN',
     ref: 'PL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6).toUpperCase(),
     metadata: { userId: currentUser.id, cart: JSON.stringify(getCart()) },
     callback: async function(response) {
