@@ -1,0 +1,18 @@
+{
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "@next_public_supabase_url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@next_public_supabase_anon_key",
+    "NEXT_PUBLIC_PAYSTACK_KEY": "@next_public_paystack_key"
+  }
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/signup", "destination": "/signup.html" },
+    { "source": "/cart", "destination": "/cart.html" },
+    { "source": "/checkout", "destination": "/checkout.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/forgot", "destination": "/forgot.html" },
+    { "source": "/reset", "destination": "/reset.html" }
+  ]
+}
