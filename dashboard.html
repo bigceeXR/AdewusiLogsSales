@@ -19,7 +19,7 @@
       <div class="nav-links">
         <a href="/">Shop</a>
         <span id="cartIcon" class="cart-icon" onclick="window.location='cart'">🛒 <span id="cartCount">0</span></span>
-        <button class="btn-outline" onclick="signOut()" style="padding:6px 16px">Sign Out</button>
+        <button class="btn-outline" onclick="signOut()" style="padding:6px 16px" data-load-text="Signing out...">Sign Out</button>
       </div>
     </div>
   </nav>
@@ -68,7 +68,7 @@
             <label>Date of Birth</label>
             <input type="date" id="pDob" disabled style="background:var(--gray-100)" />
           </div>
-          <button class="btn-primary" onclick="saveProfile()">Save Changes</button>
+          <button class="btn-primary" onclick="saveProfile()" data-load-text="Saving changes...">Save Changes</button>
         </div>
 
       </div>

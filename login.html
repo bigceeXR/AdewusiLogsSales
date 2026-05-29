@@ -38,7 +38,7 @@
         <div style="text-align:right;margin-bottom:18px">
           <a href="forgot" style="font-size:0.85rem;color:var(--blue);font-weight:600">Forgot password?</a>
         </div>
-        <button class="btn-primary" onclick="doLogin()">Sign In</button>
+        <button class="btn-primary" onclick="doLogin()" data-load-text="Signing in...">Sign In</button>
         <div class="auth-switch">New here? <a href="signup">Create an account</a></div>
       </div>
 
@@ -51,7 +51,7 @@
           <input maxlength="1"/><input maxlength="1"/><input maxlength="1"/>
           <input maxlength="1"/><input maxlength="1"/><input maxlength="1"/>
         </div>
-        <button class="btn-primary" onclick="verifyOtp()">Verify & Continue</button>
+        <button class="btn-primary" onclick="verifyOtp()" data-load-text="Verifying...">Verify & Continue</button>
         <p style="text-align:center;margin-top:14px;font-size:0.85rem;color:var(--gray-500)">
           Didn't receive it? <a href="#" onclick="resendOtp()" style="color:var(--blue);font-weight:700">Resend OTP</a>
         </p>
