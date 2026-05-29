@@ -74,8 +74,8 @@ function removeItem(id) {
 async function proceedCheckout() {
   const user = await getUser();
   if (!user) {
-    window.location.href = 'login?redirect=' + encodeURIComponent('cart.html');
+    window.location.href = 'login?redirect=' + encodeURIComponent('cart');
     return;
   }
-  window.location.href = 'checkout.html';
+  window.location.href = 'checkout';
 }

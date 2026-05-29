@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!currentUser) return;
 
   const cart = getCart();
-  if (!cart.length) { window.location.href = 'cart.html'; return; }
+  if (!cart.length) { window.location.href = 'cart'; return; }
 
   currentProfile = await getProfile(currentUser.id);
   renderBilling();

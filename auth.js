@@ -25,12 +25,12 @@ async function renderAuthArea() {
   const user = await getUser();
   if (user) {
     el.innerHTML = `
-      <a href="dashboard.html" style="color:var(--blue);font-weight:700">Dashboard</a>
+      <a href="dashboard" style="color:var(--blue);font-weight:700">Dashboard</a>
       <button class="btn-outline" onclick="signOut()" style="padding:6px 16px">Sign Out</button>`;
   } else {
     el.innerHTML = `
       <a href="login" style="color:var(--gray-700);font-weight:600">Login</a>
-      <a href="signup.html" class="btn-primary" style="padding:8px 18px">Sign Up</a>`;
+      <a href="signup" class="btn-primary" style="padding:8px 18px">Sign Up</a>`;
   }
 }
 
