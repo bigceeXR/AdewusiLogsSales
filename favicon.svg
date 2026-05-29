@@ -1,0 +1,52 @@
+<svg width="100%" viewBox="0 0 680 680" role="img" xmlns="http://www.w3.org/2000/svg" style="">
+  <title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Pluto Logs icon</title>
+  <desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Planet Pluto with a stylized letter P in the center</desc>
+  <defs>
+    <radialGradient id="planetGrad" cx="42%" cy="38%" r="58%">
+      <stop offset="0%" stop-color="#5b9bff"/>
+      <stop offset="45%" stop-color="#1a6bff"/>
+      <stop offset="100%" stop-color="#0a2a80"/>
+    </radialGradient>
+    <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3d85ff" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#1a6bff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="craterGrad" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#0a2a80" stop-opacity="0.0"/>
+      <stop offset="100%" stop-color="#061060" stop-opacity="0.55"/>
+    </radialGradient>
+    <radialGradient id="shineGrad" cx="35%" cy="28%" r="45%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Outer glow -->
+  <ellipse cx="340" cy="340" rx="310" ry="310" fill="url(#glowGrad)" style="stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Ring / orbit band -->
+  <ellipse cx="340" cy="340" rx="295" ry="68" fill="none" stroke="#a8c8ff" stroke-width="10" stroke-opacity="0.18" transform="rotate(-22,340,340)" style="fill:none;stroke:rgb(168, 200, 255);color:rgb(255, 255, 255);stroke-width:10px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <ellipse cx="340" cy="340" rx="295" ry="68" fill="none" stroke="#1a6bff" stroke-width="4" stroke-opacity="0.28" transform="rotate(-22,340,340)" style="fill:none;stroke:rgb(26, 107, 255);color:rgb(255, 255, 255);stroke-width:4px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Planet body -->
+  <circle cx="340" cy="340" r="230" fill="url(#planetGrad)" style="stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Surface texture bands -->
+  <ellipse cx="340" cy="285" rx="195" ry="28" fill="#1a6bff" fill-opacity="0.22" style="fill:rgb(26, 107, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <ellipse cx="340" cy="395" rx="175" ry="20" fill="#0a2a80" fill-opacity="0.25" style="fill:rgb(10, 42, 128);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <ellipse cx="340" cy="450" rx="140" ry="14" fill="#1a6bff" fill-opacity="0.15" style="fill:rgb(26, 107, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Crater detail -->
+  <circle cx="430" cy="255" r="30" fill="url(#craterGrad)" stroke="#0a2a80" stroke-width="1.5" stroke-opacity="0.3" style="stroke:rgb(10, 42, 128);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <circle cx="245" cy="415" r="18" fill="url(#craterGrad)" stroke="#0a2a80" stroke-width="1" stroke-opacity="0.25" style="stroke:rgb(10, 42, 128);color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <circle cx="390" cy="430" r="12" fill="url(#craterGrad)" stroke="#0a2a80" stroke-width="1" stroke-opacity="0.2" style="stroke:rgb(10, 42, 128);color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Planet shine -->
+  <circle cx="340" cy="340" r="230" fill="url(#shineGrad)" style="stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Stylized "P" letter -->
+  <text x="340" y="400" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="210" font-weight="700" font-style="italic" fill="#ffffff" fill-opacity="0.92" letter-spacing="-4" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Georgia, &quot;Times New Roman&quot;, serif;font-size:210px;font-weight:700;font-style:italic;text-anchor:middle;dominant-baseline:auto">P</text>
+
+  <!-- Ring front layer (goes over planet edge for realism) -->
+  <ellipse cx="340" cy="340" rx="295" ry="68" fill="none" stroke="#c8deff" stroke-width="3" stroke-opacity="0.12" transform="rotate(-22,340,340)" stroke-dasharray="420 480" style="fill:none;stroke:rgb(200, 222, 255);color:rgb(255, 255, 255);stroke-width:3px;stroke-dasharray:420px, 480px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+</svg>
