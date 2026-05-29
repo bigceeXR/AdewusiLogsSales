@@ -1,13 +1,1066 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SocialVault - Premium Digital Assets</title>
-  </head>
-  <body class="bg-slate-50/50">
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialMarket - Premium Social Accounts</title>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Paystack Inline JS -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-blue: #0056b3;
+            --light-blue: #e6f0fa;
+            --dark-blue: #003d80;
+            --white: #ffffff;
+            --gray: #f4f4f4;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --success: #28a745;
+            --danger: #dc3545;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--gray);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        nav a:hover {
+            color: var(--primary-blue);
+        }
+
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.75rem;
+        }
+
+        /* --- Main Layout --- */
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* --- Product Grid --- */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform 0.2s;
+            border: 1px solid #ddd;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-header {
+            background-color: var(--light-blue);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .platform-name {
+            font-weight: bold;
+            text-transform: uppercase;
+            color: var(--primary-blue);
+        }
+
+        .product-body {
+            padding: 1.5rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+        }
+
+        .stat-value {
+            font-weight: 600;
+        }
+
+        .price-tag {
+            font-size: 1.25rem;
+            color: var(--dark-blue);
+            font-weight: bold;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-blue);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        /* --- Modals & Overlays --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--text-light);
+        }
+
+        /* --- Auth Forms --- */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: var(--radius);
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .auth-switch span {
+            color: var(--primary-blue);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* --- Cart Modal --- */
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qty-btn {
+            background: var(--light-blue);
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .cart-total {
+            margin-top: 1rem;
+            text-align: right;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--dark-blue);
+        }
+
+        .terms-agreement {
+            margin: 1rem 0;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .terms-link {
+            color: var(--primary-blue);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        /* --- Dashboard --- */
+        .dashboard-container {
+            display: none; /* Hidden by default */
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .purchase-history {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: var(--light-blue);
+            color: var(--dark-blue);
+        }
+
+        .view-creds-btn {
+            background: var(--success);
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #333;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 2000;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Utility */
+        .hidden { display: none !important; }
+        .text-blue { color: var(--primary-blue); }
+        .text-center { text-align: center; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fa-brands fa-twitter"></i> SocialMarket
+        </div>
+        <nav>
+            <ul id="nav-links">
+                <li><a onclick="showPage('home')">Marketplace</a></li>
+                <li id="dashboard-link" class="hidden"><a onclick="showPage('dashboard')">Dashboard</a></li>
+                <li id="auth-link"><a onclick="openAuthModal()">Login / Sign Up</a></li>
+                <li id="logout-link" class="hidden"><a onclick="logout()">Logout</a></li>
+            </ul>
+        </nav>
+        <div class="cart-icon" onclick="openCartModal()">
+            <i class="fa-solid fa-cart-shopping fa-lg"></i>
+            <div class="cart-badge" id="cart-count">0</div>
+        </div>
+    </header>
+
+    <!-- Main Content: Marketplace -->
+    <main id="page-home">
+        <h2 style="margin-bottom: 1.5rem;">Available Accounts</h2>
+        <div class="products-grid" id="products-container">
+            <!-- Products will be injected here via JS -->
+        </div>
+    </main>
+
+    <!-- Main Content: Dashboard -->
+    <main id="page-dashboard" class="dashboard-container">
+        <div class="dashboard-header">
+            <h2>My Dashboard</h2>
+            <div>
+                <span id="user-display-name"></span>
+            </div>
+        </div>
+        
+        <h3>Purchase History</h3>
+        <div class="purchase-history">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Platform</th>
+                        <th>Followers</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="purchase-table-body">
+                    <!-- Purchases injected here -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal: Privacy Policy (First View) -->
+    <div class="modal-overlay" id="privacy-modal">
+        <div class="modal-content">
+            <h2 class="text-blue">Privacy Policy & Disclaimer</h2>
+            <p style="margin: 1rem 0;">
+                Welcome to SocialMarket. Please read and accept the following terms before entering:
+            </p>
+            <ul style="margin-left: 20px; margin-bottom: 1rem;">
+                <li>Any illegal use of the accounts purchased from this platform is strictly punishable by law.</li>
+                <li>SocialMarket has no hand in illegal activities conducted using purchased accounts.</li>
+                <li>We sell these accounts exclusively for legal marketing, networking, and growth purposes.</li>
+                <li>By proceeding, you agree that you are solely responsible for the use of the account.</li>
+            </ul>
+            <button class="btn btn-primary" onclick="acceptPrivacy()">I Agree & Enter</button>
+        </div>
+    </div>
+
+    <!-- Modal: Authentication (Login/Signup/Forgot) -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModals()">&times;</span>
+            
+            <!-- Login View -->
+            <div id="view-login">
+                <h2 class="text-center" style="margin-bottom:1rem;">Login</h2>
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <div class="auth-switch">
+                        <span onclick="switchAuthView('forgot')">Forgot Password?</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Send OTP</button>
+                </form>
+                <div class="auth-switch">
+                    Don't have an account? <span onclick="switchAuthView('signup')">Sign Up</span>
+                </div>
+            </div>
+
+            <!-- Signup View -->
+            <div id="view-signup" class="hidden">
+                <h2 class="text-center" style="margin-bottom:1rem;">Create Account</h2>
+                <form onsubmit="handleSignup(event)">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="signup-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="signup-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth (Must be 18+)</label>
+                        <input type="date" id="signup-dob" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="signup-phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signup-pass" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Sign Up</button>
+                </form>
+                <div class="auth-switch">
+                    Already have an account? <span onclick="switchAuthView('login')">Login</span>
+                </div>
+            </div>
+
+            <!-- OTP Verification View -->
+            <div id="view-otp" class="hidden">
+                <h2 class="text-center" style="margin-bottom:1rem;">Verify OTP</h2>
+                <p class="text-center" style="margin-bottom:1rem;">Enter the code sent to your email.</p>
+                <form onsubmit="verifyOtp(event)">
+                    <div class="form-group">
+                        <label>OTP Code</label>
+                        <input type="text" id="otp-input" placeholder="123456" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Verify & Login</button>
+                </form>
+            </div>
+
+            <!-- Forgot Password View -->
+            <div id="view-forgot" class="hidden">
+                <h2 class="text-center" style="margin-bottom:1rem;">Reset Password</h2>
+                <form onsubmit="handleForgot(event)">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="forgot-email" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Reset Code</button>
+                </form>
+                <div class="auth-switch">
+                    <span onclick="switchAuthView('login')">Back to Login</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Cart -->
+    <div class="modal-overlay" id="cart-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModals()">&times;</span>
+            <h2>Your Cart</h2>
+            <div id="cart-items-container">
+                <!-- Items -->
+                <p class="text-center" style="margin: 2rem 0;">Your cart is empty.</p>
+            </div>
+            
+            <div class="cart-total" id="cart-total-display">Total: $0</div>
+
+            <div class="terms-agreement">
+                <input type="checkbox" id="terms-checkbox">
+                <label for="terms-checkbox">
+                    By continuing you agree to our <span class="terms-link" onclick="openTerms()">Terms and Conditions</span>
+                </label>
+            </div>
+
+            <button class="btn btn-primary" onclick="initiateCheckout()" id="checkout-btn" disabled>Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <!-- Modal: Terms & Conditions Popup -->
+    <div class="modal-overlay" id="terms-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="document.getElementById('terms-modal').style.display='none'">&times;</span>
+            <h2>Terms and Conditions</h2>
+            <div style="height: 300px; overflow-y: auto; margin: 1rem 0; border: 1px solid #eee; padding: 10px;">
+                <h4>1. Legal Usage</h4>
+                <p>Any illegal use of the things he/she purchased would be punishable and we would have no hand in it. We sell it for legal uses only.</p>
+                <br>
+                <h4>2. Account Ownership</h4>
+                <p>These accounts are legally owned by the seller and transferred to you upon purchase. You assume full responsibility after the transfer.</p>
+                <br>
+                <h4>3. No Refunds</h4>
+                <p>Once credentials are delivered, refunds are not applicable unless the account does not match the description.</p>
+                <br>
+                <h4>4. Privacy</h4>
+                <p>Your data is stored securely and not shared with third parties.</p>
+            </div>
+            <button class="btn btn-primary" onclick="document.getElementById('terms-modal').style.display='none'">Close</button>
+        </div>
+    </div>
+
+    <!-- Modal: View Credentials -->
+    <div class="modal-overlay" id="creds-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModals()">&times;</span>
+            <h3>Login Credentials</h3>
+            <div style="margin-top: 1rem; background: #f8f9fa; padding: 1rem; border-radius: 4px;">
+                <p><strong>Email/Phone:</strong> <span id="cred-user"></span></p>
+                <p><strong>Password:</strong> <span id="cred-pass"></span></p>
+                <p><strong>2FA Code:</strong> <span id="cred-2fa"></span></p>
+                <p><strong>2FA Host:</strong> <span id="cred-host"></span></p>
+            </div>
+            <p style="font-size: 0.8rem; color: #666; margin-top: 10px;">Please save these details immediately.</p>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">Action Successful</div>
+
+    <script>
+        // --- CONFIGURATION ---
+        // REPLACE WITH YOUR KEYS
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const PAYSTACK_PUBLIC_KEY = 'YOUR_PAYSTACK_PUBLIC_KEY';
+
+        // Initialize Supabase (Mock if keys not present)
+        let supabase;
+        try {
+            if(SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+                console.warn('Supabase not configured. Using Mock Mode.');
+                supabase = createMockSupabase();
+            } else {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.error("Supabase init failed", e);
+        }
+
+        // --- STATE ---
+        let currentUser = null;
+        let cart = [];
+        let tempEmailForOtp = ""; // Store email during OTP flow
+
+        // --- MOCK DATA (Since we don't have a live backend connected) ---
+        const MOCK_PRODUCTS = [
+            {
+                id: 1,
+                platform: 'Instagram',
+                followers: '150K',
+                country: 'USA',
+                available: 5,
+                price: 150,
+                icon: 'fa-instagram'
+            },
+            {
+                id: 2,
+                platform: 'Facebook',
+                followers: '50K',
+                country: 'UK',
+                available: 3,
+                price: 80,
+                icon: 'fa-facebook'
+            },
+            {
+                id: 3,
+                platform: 'TikTok',
+                followers: '300K',
+                country: 'USA',
+                available: 2,
+                price: 200,
+                icon: 'fa-tiktok'
+            },
+            {
+                id: 4,
+                platform: 'Twitter/X',
+                followers: '10K',
+                country: 'Canada',
+                available: 10,
+                price: 40,
+                icon: 'fa-x-twitter'
+            }
+        ];
+
+        // --- INIT ---
+        window.addEventListener('DOMContentLoaded', () => {
+            // Show Privacy Modal first
+            document.getElementById('privacy-modal').style.display = 'flex';
+            
+            // Render Products
+            renderProducts();
+
+            // Check session (Mock implementation)
+            const storedUser = localStorage.getItem('socialmarket_user');
+            if(storedUser) {
+                currentUser = JSON.parse(storedUser);
+                updateAuthUI();
+            }
+
+            // Cart listeners
+            document.getElementById('terms-checkbox').addEventListener('change', (e) => {
+                document.getElementById('checkout-btn').disabled = !e.target.checked;
+            });
+        });
+
+        // --- UI FUNCTIONS ---
+        function acceptPrivacy() {
+            document.getElementById('privacy-modal').style.display = 'none';
+        }
+
+        function openTerms() {
+            document.getElementById('terms-modal').style.display = 'flex';
+        }
+
+        function closeModals() {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function showPage(page) {
+            document.getElementById('page-home').classList.add('hidden');
+            document.getElementById('page-dashboard').classList.add('hidden');
+            
+            document.getElementById(`page-${page}`).classList.remove('hidden');
+
+            if(page === 'dashboard') loadDashboard();
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('products-container');
+            container.innerHTML = MOCK_PRODUCTS.map(p => `
+                <div class="product-card">
+                    <div class="product-header">
+                        <span class="platform-name"><i class="fa-brands ${p.icon}"></i> ${p.platform}</span>
+                        <span style="font-size:0.8rem; color:#666;">Stock: ${p.available}</span>
+                    </div>
+                    <div class="product-body">
+                        <div class="stat-row">
+                            <span class="stat-label">Followers</span>
+                            <span class="stat-value">${p.followers}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Country</span>
+                            <span class="stat-value">${p.country}</span>
+                        </div>
+                        <div class="price-tag">$${p.price}</div>
+                        <button class="btn btn-outline" onclick="addToCart(${p.id})">Add to Cart</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateAuthUI() {
+            const authLink = document.getElementById('auth-link');
+            const logoutLink = document.getElementById('logout-link');
+            const dashLink = document.getElementById('dashboard-link');
+            const userDisplay = document.getElementById('user-display-name');
+
+            if (currentUser) {
+                authLink.classList.add('hidden');
+                logoutLink.classList.remove('hidden');
+                dashLink.classList.remove('hidden');
+                userDisplay.textContent = `Hi, ${currentUser.name}`;
+            } else {
+                authLink.classList.remove('hidden');
+                logoutLink.classList.add('hidden');
+                dashLink.classList.add('hidden');
+                userDisplay.textContent = '';
+            }
+        }
+
+        // --- CART LOGIC ---
+        function addToCart(productId) {
+            const product = MOCK_PRODUCTS.find(p => p.id === productId);
+            const existing = cart.find(item => item.id === productId);
+
+            // Check stock limit
+            const currentQty = existing ? existing.qty : 0;
+            if(currentQty >= product.available) {
+                showToast("Sorry, max stock reached for this item.");
+                return;
+            }
+
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+            
+            updateCartCount();
+            showToast(`${product.platform} account added to cart!`);
+        }
+
+        function updateCartCount() {
+            const count = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cart-count').textContent = count;
+        }
+
+        function openCartModal() {
+            renderCartItems();
+            document.getElementById('cart-modal').style.display = 'flex';
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cart-items-container');
+            if(cart.length === 0) {
+                container.innerHTML = '<p class="text-center" style="margin: 2rem 0;">Your cart is empty.</p>';
+                document.getElementById('cart-total-display').textContent = 'Total: $0';
+                document.getElementById('checkout-btn').disabled = true;
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = cart.map((item, index) => {
+                total += item.price * item.qty;
+                return `
+                <div class="cart-item">
+                    <div>
+                        <strong>${item.platform}</strong><br>
+                        <small>${item.followers} - ${item.country}</small>
+                        <div>$${item.price} x ${item.qty}</div>
+                    </div>
+                    <div class="qty-controls">
+                        <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
+                        <span>${item.qty}</span>
+                        <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+                    </div>
+                </div>`;
+            }).join('');
+
+            document.getElementById('cart-total-display').textContent = `Total: $${total}`;
+        }
+
+        function updateQty(index, change) {
+            cart[index].qty += change;
+            if(cart[index].qty <= 0) {
+                cart.splice(index, 1);
+            }
+            updateCartCount();
+            renderCartItems();
+        }
+
+        // --- AUTH & SUPABASE LOGIC ---
+
+        function openAuthModal() {
+            switchAuthView('login');
+            document.getElementById('auth-modal').style.display = 'flex';
+        }
+
+        function switchAuthView(viewName) {
+            ['login', 'signup', 'otp', 'forgot'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+            });
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+        }
+
+        async function handleSignup(e) {
+            e.preventDefault();
+            const email = document.getElementById('signup-email').value;
+            const dob = new Date(document.getElementById('signup-dob').value);
+            const now = new Date();
+            const age = now.getFullYear() - dob.getFullYear();
+
+            // Age check
+            if (age < 18 || (age === 18 && now.getMonth() < dob.getMonth())) {
+                showToast("You must be 18+ to register.");
+                return;
+            }
+
+            // In real Supabase:
+            // const { data, error } = await supabase.auth.signUp({ email, password: pass })
+            // Then insert into profiles table.
+            
+            // Simulate success
+            showToast("Signup successful! Please log in.");
+            switchAuthView('login');
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            tempEmailForOtp = email; // Store for OTP step
+
+            // Here you would typically check Supabase Auth
+            // const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            
+            // Simulate sending OTP via Brevo/SMTP (Backend Edge Function logic)
+            // For prototype: just alert code
+            console.log("Sending OTP to", email);
+            
+            // Mock OTP generation
+            const mockOtp = Math.floor(100000 + Math.random() * 900000);
+            // In a real app, this goes to DB or Supabase Auth
+            localStorage.setItem('mock_otp', mockOtp); 
+            
+            showToast(`OTP sent to ${email} (Check console for mock OTP: ${mockOtp})`);
+            switchAuthView('otp');
+        }
+
+        async function verifyOtp(e) {
+            e.preventDefault();
+            const inputOtp = document.getElementById('otp-input').value;
+            const storedOtp = localStorage.getItem('mock_otp');
+
+            if(inputOtp === storedOtp) {
+                // Success
+                currentUser = {
+                    id: 'user_123',
+                    email: tempEmailForOtp,
+                    name: 'Demo User'
+                };
+                localStorage.setItem('socialmarket_user', JSON.stringify(currentUser));
+                updateAuthUI();
+                closeModals();
+                showToast("Logged in successfully!");
+            } else {
+                showToast("Invalid OTP code.");
+            }
+        }
+
+        async function handleForgot(e) {
+            e.preventDefault();
+            const email = document.getElementById('forgot-email').value;
+            // Logic to send reset email via Brevo/Supabase
+            showToast("Reset link sent to your email.");
+            switchAuthView('login');
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('socialmarket_user');
+            updateAuthUI();
+            showPage('home');
+            showToast("Logged out.");
+        }
+
+        // --- PAYMENT (PAYSTACK) ---
+        function initiateCheckout() {
+            if(!currentUser) {
+                closeModals();
+                openAuthModal();
+                showToast("Please login to checkout.");
+                return;
+            }
+
+            const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.qty), 0) * 100; // in Kobo/cents
+
+            let handler = PaystackPop.setup({
+                key: PAYSTACK_PUBLIC_KEY, // Replace with real key
+                email: currentUser.email,
+                amount: totalAmount,
+                currency: 'USD', // Or NGN
+                ref: ''+Math.floor((Math.random() * 1000000000) + 1),
+                metadata: {
+                     custom_fields: [
+                        { display_name: "User ID", variable_name: "user_id", value: currentUser.id }
+                     ]
+                },
+                callback: function(response) {
+                    // Payment Successful
+                    processSuccessfulOrder(response.reference);
+                },
+                onClose: function() {
+                    // Fallback
+                    showToast('Transaction canceled');
+                }
+            });
+
+            // If using mock keys, just simulate success
+            if(PAYSTACK_PUBLIC_KEY === 'YOUR_PAYSTACK_PUBLIC_KEY') {
+                showToast("Mock Payment: Simulating Success...");
+                setTimeout(() => processSuccessfulOrder('mock_ref_123'), 1500);
+            } else {
+                handler.openIframe();
+            }
+        }
+
+        async function processSuccessfulOrder(ref) {
+            closeModals();
+            cart = [];
+            updateCartCount();
+            
+            // Save to DB (Purchases table)
+            // await supabase.from('purchases').insert(...)
+            
+            showToast(`Order successful! Ref: ${ref}`);
+            
+            // If logged in, go to dashboard
+            if(currentUser) {
+                showPage('dashboard');
+            }
+        }
+
+        // --- DASHBOARD LOGIC ---
+        async function loadDashboard() {
+            const tbody = document.getElementById('purchase-table-body');
+            
+            // Mock Data for Purchases
+            const mockPurchases = [
+                {
+                    id: 'pur_1',
+                    date: '2023-10-15',
+                    platform: 'Instagram',
+                    followers: '10K',
+                    status: 'completed',
+                    credentials: {
+                        user: 'insta_user@gmail.com',
+                        pass: 'password123',
+                        tfa: '123456',
+                        host: 'ga.google.com'
+                    }
+                },
+                {
+                    id: 'pur_2',
+                    date: '2023-10-20',
+                    platform: 'Facebook',
+                    followers: '5K',
+                    status: 'completed',
+                    credentials: {
+                        user: '+123456789',
+                        pass: 'fbsecure',
+                        tfa: null,
+                        host: null
+                    }
+                }
+            ];
+
+            // In real app: const { data } = await supabase.from('purchases').select('*').eq('user_id', currentUser.id);
+
+            tbody.innerHTML = mockPurchases.map(p => `
+                <tr>
+                    <td>${p.date}</td>
+                    <td>${p.platform}</td>
+                    <td>${p.followers}</td>
+                    <td><span style="color: ${p.status === 'completed' ? 'green' : 'orange'}">${p.status}</span></td>
+                    <td>
+                        ${p.status === 'completed' ? 
+                          `<button class="view-creds-btn" onclick="viewCredentials('${btoa(JSON.stringify(p.credentials))}')">View Details</button>` : 
+                          'Pending'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function viewCredentials(encodedCreds) {
+            const creds = JSON.parse(atob(encodedCreds));
+            document.getElementById('cred-user').textContent = creds.user || 'N/A';
+            document.getElementById('cred-pass').textContent = creds.pass;
+            document.getElementById('cred-2fa').textContent = creds.tfa || 'None';
+            document.getElementById('cred-host').textContent = creds.host || 'None';
+            
+            document.getElementById('creds-modal').style.display = 'flex';
+        }
+
+        // --- MOCK SUPABASE CLIENT (For testing without keys) ---
+        function createMockSupabase() {
+            return {
+                auth: {
+                    signInWithPassword: () => new Promise(r => r({ data: { user: { id: '123' }}, error: null })),
+                    signUp: () => new Promise(r => r({ data: { user: { id: '123' }}, error: null }))
+                },
+                from: () => ({
+                    select: () => new Promise(r => r({ data: [], error: null })),
+                    insert: () => new Promise(r => r({ error: null }))
+                })
+            }
+        }
+
+    </script>
+</body>
 </html>
