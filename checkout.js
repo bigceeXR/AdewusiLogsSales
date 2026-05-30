@@ -61,10 +61,10 @@ function initPaystack() {
     currency: 'NGN',
     ref: 'PL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6).toUpperCase(),
     metadata: { userId: currentUser.id, cart: JSON.stringify(getCart()) },
-    callback: async function(response) {
-      await handlePaymentSuccess(response.reference);
+    onSuccess: function(response) {
+      handlePaymentSuccess(response.reference);
     },
-    onClose: function() {
+    onCancel: function() {
       showToast('Payment cancelled.', 'error');
     }
   });
