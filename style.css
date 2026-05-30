@@ -154,7 +154,8 @@ input, select, textarea { font-family: var(--font); }
 .error-msg { background: #fef2f2; color: var(--red); border-radius: 8px; padding: 10px 14px; font-size: 0.85rem; margin-bottom: 16px; display: none; }
 .error-msg.show { display: block; }
 .otp-inputs { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
-.otp-inputs input { width: 48px; height: 52px; text-align: center; font-size: 1.3rem; font-weight: 700; border: 1.5px solid var(--gray-300); border-radius: 10px; outline: none; }
+.otp-inputs input { width: 40px; height: 48px; text-align: center; font-size: 1.1rem; font-weight: 700; border: 1.5px solid var(--gray-300); border-radius: 10px; outline: none; }
+.otp-inputs { gap: 7px; }
 .otp-inputs input:focus { border-color: var(--blue); }
 .terms-note { font-size: 0.8rem; color: var(--gray-500); margin-top: 14px; text-align: center; }
 .terms-note a { color: var(--blue); font-weight: 600; cursor: pointer; }
@@ -254,7 +255,7 @@ html, body { overflow-x: hidden; width: 100%; }
   /* ── Auth cards ── */
   .auth-card { padding: 28px 18px; margin: 0 4px; }
   .form-row { flex-direction: column; gap: 0; }
-  .otp-inputs input { width: 40px; height: 46px; font-size: 1.1rem; }
+  .otp-inputs input { width: 36px; height: 42px; font-size: 1.1rem; }
 
   /* ── Modal ── */
   .modal-box { padding: 28px 20px; }
@@ -272,5 +273,5 @@ html, body { overflow-x: hidden; width: 100%; }
   .brand { font-size: 0.95rem; }
   .hero-content h1 { font-size: 1.5rem; }
   .otp-inputs { gap: 6px; }
-  .otp-inputs input { width: 36px; height: 42px; }
+  .otp-inputs input { width: 32px; height: 38px; }
 }
