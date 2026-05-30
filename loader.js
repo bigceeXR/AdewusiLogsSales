@@ -1,5 +1,17 @@
 // loader.js — Windows 11 style loading utilities
 
+// ── Active button reset tracker ─────────────────────────────────────
+// Stores the reset function of the currently loading button
+// so any JS file can call resetActiveBtn() to stop the loader
+let _activeBtnReset = null;
+
+function resetActiveBtn() {
+  if (_activeBtnReset) {
+    _activeBtnReset();
+    _activeBtnReset = null;
+  }
+}
+
 // ── SVG spinner markup ──────────────────────────────────────────────
 function spinnerSVG(color = '#ffffff', size = 20) {
   return `<span class="w11-spinner" style="width:${size}px;height:${size}px">
@@ -16,10 +28,13 @@ function btnLoad(btn, text = 'Loading...') {
   const spinColor = isOutline ? '#1a6bff' : '#ffffff';
   btn.classList.add('btn-loading');
   btn.innerHTML = `${spinnerSVG(spinColor, 18)}<span class="btn-text">${text}</span>`;
-  return function reset(newLabel) {
+  const reset = function(newLabel) {
     btn.classList.remove('btn-loading');
     btn.innerHTML = newLabel || original;
+    if (_activeBtnReset === reset) _activeBtnReset = null;
   };
+  _activeBtnReset = reset;
+  return reset;
 }
 
 // ── Page overlay loader ─────────────────────────────────────────────
@@ -70,8 +85,44 @@ function linkLoad(el) {
   return () => el.classList.remove('link-loading');
 }
 
-// ── Auto-wire ───────────────────────────────────────────────────────
-// Checks inputs before showing loader so it never loads on bad/empty input
+// ── Patch showErr to auto-stop loader on any error ──────────────────
+// Wraps the global showErr functions used in login.js and signup.js
+// so whenever an error is shown, the button loader stops automatically
+const _origShowErr = window.showErr;
+document.addEventListener('DOMContentLoaded', () => {
+  // Override showErr globally after all scripts load
+  // Each page defines its own showErr — we wrap it here
+  const pages = [
+    { fn: 'showErr', files: ['login.js', 'signup.js', 'forgot.html', 'reset.html'] }
+  ];
+
+  // Intercept any call that shows an error element and stop the loader
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach(m => {
+      m.addedNodes.forEach(node => {
+        if (node.nodeType === 1) {
+          const el = node.classList?.contains('error-msg') ? node :
+                     node.querySelector?.('.error-msg');
+          if (el && el.classList.contains('show')) resetActiveBtn();
+        }
+      });
+      // Also watch class changes on error-msg elements
+      if (m.type === 'attributes' && m.target.classList?.contains('error-msg')) {
+        if (m.target.classList.contains('show')) resetActiveBtn();
+      }
+    });
+  });
+
+  // Observe all error message elements on the page
+  document.querySelectorAll('.error-msg').forEach(el => {
+    observer.observe(el, { attributes: true, attributeFilter: ['class'] });
+  });
+
+  // Also observe body for dynamically added error elements
+  observer.observe(document.body, { childList: true, subtree: true });
+});
+
+// ── Auto-wire: data-load-text on buttons & anchors ──────────────────
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-load-text]').forEach(el => {
     el.addEventListener('click', function () {
