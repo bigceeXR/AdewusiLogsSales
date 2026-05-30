@@ -1,6 +1,6 @@
 // loader.js — Windows 11 style loading utilities
 
-// ── Active button reset tracker ─────────────────────────────────────
+// ── Active button reset tracker ────────────────────────────────────
 // Stores the reset function of the currently loading button
 // so any JS file can call resetActiveBtn() to stop the loader
 let _activeBtnReset = null;
