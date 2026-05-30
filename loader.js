@@ -10,7 +10,6 @@ function spinnerSVG(color = '#ffffff', size = 20) {
 }
 
 // ── Button loader ───────────────────────────────────────────────────
-// Usage: const reset = btnLoad(btn, 'Signing in...')  →  reset() to restore
 function btnLoad(btn, text = 'Loading...') {
   const original = btn.innerHTML;
   const isOutline = btn.classList.contains('btn-outline');
@@ -24,7 +23,6 @@ function btnLoad(btn, text = 'Loading...') {
 }
 
 // ── Page overlay loader ─────────────────────────────────────────────
-// Usage: const hide = pageLoad('Verifying OTP...')  →  hide() to dismiss
 let _pageLoader = null;
 function pageLoad(msg = 'Loading...') {
   if (!_pageLoader) {
@@ -46,8 +44,7 @@ function pageLoad(msg = 'Loading...') {
   };
 }
 
-// ── Skeleton grid (replaces a container with shimmer cards) ─────────
-// Usage: skelGrid(el, 6)  →  shows 6 skeleton cards
+// ── Skeleton grid ───────────────────────────────────────────────────
 function skelGrid(el, count = 3) {
   el.innerHTML = Array(count).fill(`
     <div class="account-card" style="padding:20px">
@@ -68,18 +65,38 @@ function skelTable(tbodyEl, cols = 5, rows = 4) {
 }
 
 // ── Link load state ─────────────────────────────────────────────────
-// Usage: linkLoad(aEl)  →  returns reset fn
 function linkLoad(el) {
   el.classList.add('link-loading');
   return () => el.classList.remove('link-loading');
 }
 
-// ── Auto-wire: data-load-text on buttons & anchors ──────────────────
-// Add  data-load-text="Signing in..."  to any <button> or <a>
-// and it will auto-show spinner on click.
+// ── Auto-wire ───────────────────────────────────────────────────────
+// Checks inputs before showing loader so it never loads on bad/empty input
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-load-text]').forEach(el => {
-    el.addEventListener('click', function() {
+    el.addEventListener('click', function () {
+      const parent = el.closest('form, div, section') || document.body;
+      const requiredInputs = parent.querySelectorAll(
+        'input[required], input[type="email"], input[type="password"], input[type="tel"], input[type="date"]'
+      );
+
+      // Check for empty inputs
+      const hasEmpty = [...requiredInputs].some(inp => !inp.value.trim());
+
+      // Check for inputs that are too short
+      const hasTooShort = [...requiredInputs].some(inp => {
+        const min = inp.dataset.minLength;
+        return min && inp.value.trim().length < parseInt(min);
+      });
+
+      // Check passwords match (if confirm password field exists)
+      const passEl = parent.querySelector('input[type="password"]');
+      const confirmEl = parent.querySelector('#confirmPassword');
+      const passwordMismatch = passEl && confirmEl && passEl.value !== confirmEl.value;
+
+      // Only show loader if all checks pass
+      if (hasEmpty || hasTooShort || passwordMismatch) return;
+
       if (el.tagName === 'A') {
         linkLoad(el);
       } else {
