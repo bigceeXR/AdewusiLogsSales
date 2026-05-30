@@ -48,7 +48,7 @@ function getOtpValue() {
 async function verifyOtp() {
   const otp = getOtpValue();
   document.getElementById('errMsg2').classList.remove('show');
-  if (otp.length < 6) return showErr('errMsg2', 'Enter the full 6-digit OTP.');
+  if (otp.length < 8) return showErr('errMsg2', 'Enter the full 6-digit OTP.');
 
   const { error } = await sb.auth.verifyOtp({
     email: loginEmail, token: otp, type: 'email'
