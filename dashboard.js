@@ -27,9 +27,8 @@ function showTab(name, el) {
 const ICONS = { Facebook:'📘', Instagram:'📸', TikTok:'🎵', 'Twitter/X':'🐦', YouTube:'▶️', Snapchat:'👻', LinkedIn:'💼', Pinterest:'📌' };
 
 async function loadPurchases() {
-  const hideLoader = pageLoad('Please wait....');
   const el = document.getElementById('purchasesContent');
-
+  const hidePurchasesLoader = pageLoad('Please wait...');
   const { data: purchases, error } = await sb
     .from('purchases')
     .select(`*, accounts(platform, country, followers), account_credentials(login_email_or_phone, password, two_factor_code, two_factor_host)`)
@@ -87,7 +86,7 @@ async function loadPurchases() {
       </table>
     </div>`;
 }
-  hideLoader();
+  hidePurchasesLoader();
 function toggleCred(id) {
   const el = document.getElementById(id);
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
