@@ -39,9 +39,9 @@ async function startSignup() {
   pendingEmail = email;
 
   // Sign up via Supabase auth — will send OTP (magic link / OTP email)
-  const { error } = await sb.auth.signUp({
+  const { error } = await window.sb.auth.signUp({
     email, password,
-    options: { emailRedirectTo: window.location.origin + '//' }
+    options: { emailRedirectTo: window.location.origin + '/index.html' }
   });
 
   if (error) return showErr('errMsg', error.message);
@@ -72,9 +72,9 @@ function getOtpValue() {
 async function verifyOtp() {
   const otp = getOtpValue();
   document.getElementById('errMsg2').classList.remove('show');
-  if (otp.length < 8) return showErr('errMsg2', 'Enter the full 6-digit OTP.');
+  if (otp.length < 6) return showErr('errMsg2', 'Enter the full 6-digit OTP.');
 
-  const { data, error } = await sb.auth.verifyOtp({
+  const { data, error } = await window.sb.auth.verifyOtp({
     email: pendingEmail, token: otp, type: 'signup'
   });
 
@@ -83,7 +83,7 @@ async function verifyOtp() {
   // Save profile
   const user = data.user;
   if (user) {
-    await sb.from('profiles').upsert({
+    await window.sb.from('profiles').upsert({
       id: user.id,
       email: pendingData.email,
       full_name: pendingData.full_name,
@@ -92,10 +92,10 @@ async function verifyOtp() {
     });
   }
 
-  window.location.href = '/';
+  window.location.href = 'index.html';
 }
 
 async function resendOtp() {
-  await sb.auth.resend({ type: 'signup', email: pendingEmail });
+  await window.sb.auth.resend({ type: 'signup', email: pendingEmail });
   alert('OTP resent! Please check your email.');
 }

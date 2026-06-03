@@ -39,7 +39,7 @@ async function loadPurchases() {
       <div style="text-align:center;padding:40px 0;color:var(--gray-500)">
         <div style="font-size:3rem;margin-bottom:12px">📭</div>
         <p>No purchases yet.</p>
-        <a href="/" class="btn-primary" style="margin-top:16px;display:inline-block">Browse Accounts</a>
+        <a href="index.html" class="btn-primary" style="margin-top:16px;display:inline-block">Browse Accounts</a>
       </div>`;
     return;
   }
@@ -62,7 +62,7 @@ async function loadPurchases() {
             <tr>
               <td>${ICONS[p.accounts?.platform] || '🌐'} ${p.accounts?.platform || '—'}</td>
               <td>${p.accounts?.country || '—'}</td>
-              <td>₦${parseFloat(p.total_paid).toLocaleString()}</td>
+              <td>$${parseFloat(p.total_paid).toFixed(2)}</td>
               <td>${new Date(p.purchased_at).toLocaleDateString()}</td>
               <td><span class="badge ${p.is_completed ? 'complete' : 'pending'}">${p.is_completed ? 'Completed' : 'Pending'}</span></td>
               <td>
@@ -110,7 +110,7 @@ async function saveProfile() {
 
   if (!name) { errEl.textContent = 'Name is required.'; errEl.classList.add('show'); return; }
 
-  const { error } = await sb.from('profiles').update({ full_name: name, phone }).eq('id', dashUser.id);
+  const { error } = await window.sb.from('profiles').update({ full_name: name, phone }).eq('id', dashUser.id);
   if (error) { errEl.textContent = error.message; errEl.classList.add('show'); return; }
 
   okEl.textContent = '✓ Profile updated successfully!';

@@ -28,8 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 let allAccounts = [];
 
 async function loadAccounts() {
-  const hideLoader = pageLoad('Fetching accounts...');
-  const { data, error } = await sb.from('accounts').select('*').eq('active', true).order('created_at', { ascending: false });
+  const { data, error } = await window.sb.from('accounts').select('*').eq('active', true).order('created_at', { ascending: false });
   if (error || !data) return;
   allAccounts = data;
 
@@ -42,7 +41,7 @@ async function loadAccounts() {
   countries.forEach(c => cf.innerHTML += `<option value="${c}">${c}</option>`);
 
   renderAccounts(data);
-  hideLoader();
+
   document.getElementById('searchInput').addEventListener('input', applyFilters);
   pf.addEventListener('change', applyFilters);
   cf.addEventListener('change', applyFilters);
@@ -95,7 +94,7 @@ function renderAccounts(accounts) {
         </div>
       </div>
       <div class="card-footer">
-        <div class="card-price">₦${parseFloat(a.price_ngn).toLocaleString()} <span>/ acc</span></div>
+        <div class="card-price">$${parseFloat(a.price_usd).toFixed(2)} <span>/ acc</span></div>
         <button class="btn-primary" style="padding:9px 18px;font-size:0.85rem"
           onclick='addToCart(${JSON.stringify(a)}, parseInt(document.getElementById("qty_${a.id}").textContent))'
           ${a.quantity_available < 1 ? 'disabled' : ''}>
