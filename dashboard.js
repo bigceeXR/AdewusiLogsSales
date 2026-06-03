@@ -35,6 +35,7 @@ async function loadPurchases() {
     .select(`*, accounts(platform, country, followers), account_credentials(login_email_or_phone, password, two_factor_code, two_factor_host)`)
     .eq('user_id', dashUser.id)
     .order('purchased_at', { ascending: false });
+    hideLoader();
 
   if (error || !purchases?.length) {
     el.innerHTML = `
