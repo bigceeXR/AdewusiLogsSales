@@ -1,6 +1,7 @@
 // main.js — home page logic
 
 document.addEventListener('DOMContentLoaded', async () => {
+  await initSupabase();
   // Privacy modal
   const modal = document.getElementById('privacyModal');
   const agreeBtn = document.getElementById('agreeBtn');

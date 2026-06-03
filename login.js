@@ -9,6 +9,7 @@ function showErr(id, msg) {
 }
 
 async function doLogin() {
+  await initSupabase();
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   document.getElementById('errMsg').classList.remove('show');

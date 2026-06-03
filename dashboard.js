@@ -3,6 +3,7 @@
 let dashUser = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
+  await initSupabase();
   dashUser = await requireAuth();
   if (!dashUser) return;
 

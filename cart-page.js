@@ -6,6 +6,7 @@ const PLATFORM_ICONS = {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
+  await initSupabase();
   renderAuthArea();
   renderCart();
 });

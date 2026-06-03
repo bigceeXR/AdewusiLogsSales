@@ -11,6 +11,7 @@ const ICONS = {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
+  await initSupabase();
   showSkeletons();
   currentUser = await requireAuth();
   if (!currentUser) return;
