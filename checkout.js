@@ -87,6 +87,9 @@ function initPaystack() {
   if (total <= 0) return showToast('Cart is empty', 'error');
   if (!currentUser) return showToast('Please log in first', 'error');
 
+  // Reset button immediately — Paystack takes over from here
+  resetActiveBtn();
+
   const handler = PaystackPop.setup({
     key: PAYSTACK_PUBLIC_KEY,
     email: currentUser.email,
