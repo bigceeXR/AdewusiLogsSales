@@ -27,6 +27,7 @@ function showTab(name, el) {
 const ICONS = { Facebook:'📘', Instagram:'📸', TikTok:'🎵', 'Twitter/X':'🐦', YouTube:'▶️', Snapchat:'👻', LinkedIn:'💼', Pinterest:'📌' };
 
 async function loadPurchases() {
+  const hideLoader = pageLoad('Please wait....');
   const el = document.getElementById('purchasesContent');
 
   const { data: purchases, error } = await sb
