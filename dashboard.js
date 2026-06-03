@@ -36,6 +36,7 @@ async function loadPurchases() {
     .order('purchased_at', { ascending: false });
 
   if (error || !purchases?.length) {
+      hidePurchasesLoader();
     el.innerHTML = `
       <div style="text-align:center;padding:40px 0;color:var(--gray-500)">
         <div style="font-size:3rem;margin-bottom:12px">📭</div>
@@ -85,8 +86,9 @@ async function loadPurchases() {
         </tbody>
       </table>
     </div>`;
-}
+
   hidePurchasesLoader();
+}
 function toggleCred(id) {
   const el = document.getElementById(id);
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
