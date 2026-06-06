@@ -1,6 +1,4 @@
-// checkout.js
-// Paystack key is loaded by supabase.js from /api/config
-function getPaystackKey() { return window.__PAYSTACK_KEY__; }
+// checkout.js — secure payment flow via backend API
 
 let currentUser = null;
 let currentProfile = null;
@@ -11,8 +9,8 @@ const ICONS = {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await initSupabase();
   showSkeletons();
+  await initSupabase();
   currentUser = await requireAuth();
   if (!currentUser) return;
   const cart = getCart();
@@ -64,92 +62,97 @@ function renderItems() {
     '₦' + parseFloat(cartTotal()).toLocaleString();
 }
 
-function initPaystack() {
-  const total = parseFloat(cartTotal());
-  if (total <= 0) return showToast('Cart is empty', 'error');
+async function initPaystack() {
   if (!currentUser) return showToast('Please log in first', 'error');
 
-  // Reset button — Paystack iframe takes over from here
+  // Reset button immediately
   resetActiveBtn();
 
-  // Paystack v1 inline.js uses `callback` and `onClose`
-  const handler = PaystackPop.setup({
-    key: getPaystackKey(),
-    email: currentUser.email,
-    amount: Math.round(total * 100),
-    currency: 'NGN',
-    ref: 'PL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6).toUpperCase(),
-    metadata: {
-      userId: currentUser.id,
-      custom_fields: [
-        { display_name: 'Customer Name', variable_name: 'name', value: currentProfile?.full_name || '' },
-        { display_name: 'Phone', variable_name: 'phone', value: currentProfile?.phone || '' }
-      ]
-    },
-    callback: function(response) {
-      handlePaymentSuccess(response.reference);
-    },
-    onClose: function() {
-      showToast('Payment cancelled.', 'error');
-    }
-  });
-
-  handler.openIframe();
-}
-
-async function handlePaymentSuccess(ref) {
-  const hideLoader = pageLoad('Confirming your payment...');
+  const hideLoader = pageLoad('Preparing your order...');
 
   try {
-    const cart = getCart();
+    // Step 1 — Ask backend to verify prices and create pending order
+    const res = await fetch('/api/initiate-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cart: getCart(),
+        userId: currentUser.id,
+        email: currentUser.email
+      })
+    });
 
-    for (const item of cart) {
-      // Find unsold credential
-      const { data: cred } = await sb
-        .from('account_credentials')
-        .select('id')
-        .eq('account_id', item.id)
-        .eq('is_sold', false)
-        .limit(1)
-        .single();
-
-      // Insert purchase rows
-      for (let q = 0; q < item.qty; q++) {
-        await window.sb.from('purchases').insert({
-          user_id: currentUser.id,
-          account_id: item.id,
-          credential_id: cred?.id || null,
-          quantity: 1,
-          total_paid: item.price,
-          paystack_ref: ref,
-          is_completed: true
-        });
-      }
-
-      // Mark credential sold
-      if (cred) {
-        await window.sb.from('account_credentials')
-          .update({ is_sold: true })
-          .eq('id', cred.id);
-      }
-
-      // Reduce stock
-      const newQty = Math.max(0, (item.maxQty || 1) - item.qty);
-      await window.sb.from('accounts')
-        .update({ quantity_available: newQty })
-        .eq('id', item.id);
-    }
-
-    // Clear cart
-    localStorage.removeItem('sv_cart');
-    updateCartCount();
-
+    const data = await res.json();
     hideLoader();
-    window.location.href = '/dashboard?payment=success';
+
+    if (data.error) return showToast(data.error, 'error');
+
+    // Step 2 — Open Paystack with server-verified amount
+    const handler = PaystackPop.setup({
+      key: data.key,
+      email: data.email,
+      amount: data.amount, // kobo, set by server
+      currency: 'NGN',
+      ref: data.ref,       // ref created by server
+      metadata: {
+        userId: currentUser.id,
+        custom_fields: [
+          { display_name: 'Customer Name', variable_name: 'name', value: currentProfile?.full_name || '' },
+          { display_name: 'Phone', variable_name: 'phone', value: currentProfile?.phone || '' }
+        ]
+      },
+      callback: function(response) {
+        // Step 3 — Payment done, wait for webhook to process
+        // We just show success UI — webhook does the DB work
+        handlePaymentDone(response.reference);
+      },
+      onClose: function() {
+        showToast('Payment cancelled.', 'error');
+      }
+    });
+
+    handler.openIframe();
 
   } catch (err) {
     hideLoader();
-    console.error('Payment save error:', err);
-    showToast('Payment received but something went wrong. Contact support. Ref: ' + ref, 'error');
+    showToast('Could not initiate payment. Try again.', 'error');
+    console.error(err);
   }
+}
+
+async function handlePaymentDone(ref) {
+  // Show loader while we wait for webhook to process
+  const hideLoader = pageLoad('Confirming your payment...');
+
+  // Poll purchases table until webhook records it (max 15 seconds)
+  let attempts = 0;
+  const maxAttempts = 15;
+
+  const poll = setInterval(async () => {
+    attempts++;
+
+    const { data } = await window.sb
+      .from('purchases')
+      .select('id')
+      .eq('paystack_ref', ref)
+      .eq('is_completed', true)
+      .single();
+
+    if (data) {
+      // Webhook has processed it
+      clearInterval(poll);
+      localStorage.removeItem('sv_cart');
+      updateCartCount();
+      hideLoader();
+      window.location.href = '/dashboard?payment=success';
+    } else if (attempts >= maxAttempts) {
+      // Timeout — webhook may be slow but payment was made
+      clearInterval(poll);
+      hideLoader();
+      showToast('Payment received! Your order will appear shortly on your dashboard.', 'success');
+      localStorage.removeItem('sv_cart');
+      updateCartCount();
+      setTimeout(() => window.location.href = '/dashboard', 3000);
+    }
+  }, 1000); // check every second
 }
