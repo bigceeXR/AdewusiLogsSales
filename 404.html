@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Page Not Found — Pluto Logs</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #f7f9ff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #0f1829;
+    }
+
+    .scene {
+      width: 280px;
+      height: 260px;
+      position: relative;
+      margin-bottom: 32px;
+    }
+
+    /* Ground */
+    .ground {
+      position: absolute;
+      bottom: 0;
+      left: 0; right: 0;
+      height: 28px;
+      background: #1a6bff;
+      border-radius: 10px;
+    }
+    .ground-stripe {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 28px;
+      border-radius: 10px;
+      background: repeating-linear-gradient(
+        90deg,
+        #1a6bff 0px, #1a6bff 28px,
+        #fbbf24 28px, #fbbf24 56px
+      );
+      opacity: 0.85;
+    }
+
+    /* Nail */
+    .nail {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 10px;
+      height: 60px;
+      background: linear-gradient(180deg, #94a3b8, #64748b);
+      border-radius: 2px;
+      animation: nailDown 0.6s ease-in-out infinite alternate;
+      transform-origin: top center;
+    }
+    .nail-head {
+      width: 26px;
+      height: 10px;
+      background: linear-gradient(180deg, #cbd5e1, #94a3b8);
+      border-radius: 4px;
+      position: absolute;
+      top: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    @keyframes nailDown {
+      0%   { height: 60px; }
+      100% { height: 42px; }
+    }
+
+    /* Wood plank */
+    .plank {
+      position: absolute;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 160px;
+      height: 26px;
+      background: linear-gradient(180deg, #d97706, #b45309);
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .plank::after {
+      content: '';
+      position: absolute;
+      top: 8px; left: 0; right: 0;
+      height: 2px;
+      background: rgba(0,0,0,0.1);
+      border-radius: 2px;
+    }
+
+    /* Arm + Hammer */
+    .arm-group {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform-origin: 20px 10px;
+      animation: swing 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes swing {
+      0%   { transform: translateX(-50%) rotate(-38deg); }
+      100% { transform: translateX(-50%) rotate(10deg); }
+    }
+
+    /* Arm */
+    .arm {
+      width: 14px;
+      height: 100px;
+      background: linear-gradient(180deg, #fbbf24, #d97706);
+      border-radius: 7px;
+      position: absolute;
+      top: 18px;
+      left: 3px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    /* Hammer head */
+    .hammer-head {
+      width: 50px;
+      height: 22px;
+      background: linear-gradient(135deg, #475569, #1e293b);
+      border-radius: 6px;
+      position: absolute;
+      top: 0;
+      left: -16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .hammer-head::after {
+      content: '';
+      position: absolute;
+      right: -6px;
+      top: 4px;
+      width: 8px;
+      height: 14px;
+      background: #334155;
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* Dust puffs on impact */
+    .dust {
+      position: absolute;
+      bottom: 46px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      animation: dustPuff 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes dustPuff {
+      0%   { opacity: 0; transform: translateX(-50%) scale(0.4); }
+      100% { opacity: 1; transform: translateX(-50%) scale(1); }
+    }
+    .dust span {
+      width: 8px;
+      height: 8px;
+      background: #cbd5e1;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dust span:nth-child(2) { width: 12px; height: 12px; margin-top: -2px; }
+    .dust span:nth-child(3) { margin-top: 2px; }
+
+    /* Stars / impact sparks */
+    .spark {
+      position: absolute;
+      bottom: 54px;
+      left: 50%;
+      animation: sparkFly 0.6s ease-out infinite alternate;
+      font-size: 0.9rem;
+    }
+    .spark:nth-child(1) { animation-delay: 0s;    margin-left: -30px; }
+    .spark:nth-child(2) { animation-delay: 0.1s;  margin-left: 20px; }
+    .spark:nth-child(3) { animation-delay: 0.05s; margin-left: -10px; margin-bottom: 10px; }
+    @keyframes sparkFly {
+      0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+      100% { opacity: 1; transform: translateY(-12px) scale(1); }
+    }
+
+    /* Text */
+    .code {
+      font-size: 5rem;
+      font-weight: 800;
+      color: #1a6bff;
+      line-height: 1;
+      margin-bottom: 12px;
+      letter-spacing: -3px;
+    }
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: #0f1829;
+    }
+    p {
+      font-size: 0.92rem;
+      color: #6b7a99;
+      margin-bottom: 28px;
+      text-align: center;
+      max-width: 320px;
+      line-height: 1.6;
+    }
+    .btn {
+      background: #1a6bff;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 32px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.18s, transform 0.12s;
+    }
+    .btn:hover { background: #1450cc; transform: translateY(-2px); }
+    .brand {
+      position: fixed;
+      top: 20px; left: 24px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #1a6bff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <a href="/" class="brand">⚡ Pluto Logs</a>
+
+  <div class="scene">
+    <!-- Sparks -->
+    <div class="spark">✦</div>
+    <div class="spark">✦</div>
+    <div class="spark">✦</div>
+
+    <!-- Hammer arm -->
+    <div class="arm-group">
+      <div class="hammer-head"></div>
+      <div class="arm"></div>
+    </div>
+
+    <!-- Dust -->
+    <div class="dust">
+      <span></span><span></span><span></span>
+    </div>
+
+    <!-- Plank -->
+    <div class="plank"></div>
+
+    <!-- Nail -->
+    <div class="nail">
+      <div class="nail-head"></div>
+    </div>
+
+    <!-- Ground -->
+    <div class="ground-stripe"></div>
+  </div>
+
+  <div class="code">404</div>
+  <h2>Still Under Construction</h2>
+  <p>This page doesn't exist yet — or it may have moved. We're hammering things into place.</p>
+  <a href="/" class="btn">← Back to Home</a>
+</body>
+</html>

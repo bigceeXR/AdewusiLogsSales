@@ -9,5 +9,9 @@
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/forgot", "destination": "/forgot.html" },
     { "source": "/reset", "destination": "/reset.html" }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/404.html" }
   ]
 }
