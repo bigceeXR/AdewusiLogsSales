@@ -57,6 +57,7 @@ function renderCart() {
 
   document.getElementById('totalAmount').textContent = '₦' + parseFloat(cartTotal()).toLocaleString()
 ;
+  hidePurchasesLoader();
 }
 
 function adjustQty(id, delta, max = 99) {
@@ -66,7 +67,6 @@ function adjustQty(id, delta, max = 99) {
   cart[idx].qty = Math.max(1, Math.min(cart[idx].qty + delta, max));
   saveCart(cart);
   renderCart();
-  hidePurchasesLoader();
 }
 
 function removeItem(id) {
