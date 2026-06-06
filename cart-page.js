@@ -16,7 +16,7 @@ function renderCart() {
   const hidePurchasesLoader = pageLoad('Please wait...');
   const layout = document.getElementById('cartLayout');
   const empty = document.getElementById('emptyCart');
-
+  hidePurchasesLoader();
   if (!cart.length) {
     layout.style.display = 'none';
     empty.style.display = 'block';
@@ -57,7 +57,6 @@ function renderCart() {
 
   document.getElementById('totalAmount').textContent = '₦' + parseFloat(cartTotal()).toLocaleString()
 ;
-  hidePurchasesLoader();
 }
 
 function adjustQty(id, delta, max = 99) {
