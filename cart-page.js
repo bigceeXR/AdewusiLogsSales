@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function renderCart() {
   const cart = getCart();
+  const hidePurchasesLoader = pageLoad('Please wait...');
   const layout = document.getElementById('cartLayout');
   const empty = document.getElementById('emptyCart');
 
@@ -65,6 +66,7 @@ function adjustQty(id, delta, max = 99) {
   cart[idx].qty = Math.max(1, Math.min(cart[idx].qty + delta, max));
   saveCart(cart);
   renderCart();
+  hidePurchasesLoader();
 }
 
 function removeItem(id) {
