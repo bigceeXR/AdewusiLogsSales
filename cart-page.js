@@ -13,14 +13,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function renderCart() {
   const cart = getCart();
-  const hidePurchasesLoader = pageLoad('Please wait...');
   const layout = document.getElementById('cartLayout');
   const empty = document.getElementById('emptyCart');
 
   if (!cart.length) {
     layout.style.display = 'none';
     empty.style.display = 'block';
-    hidePurchasesLoader();
     return;
   }
 
