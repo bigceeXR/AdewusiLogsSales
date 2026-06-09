@@ -88,7 +88,13 @@ async function loadPurchases() {
     </div>
   `).join('');
 }
-
+function toggleChangePassword() {
+  const section = document.getElementById('changePwSection');
+  const btn = document.getElementById('togglePwBtn');
+  const isHidden = section.style.display === 'none';
+  section.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? '✕ Cancel' : '🔑 Change Password';
+}
 function toggleCred(id, btn) {
   const el = document.getElementById(id);
   const isHidden = el.style.display === 'none';
@@ -105,7 +111,26 @@ async function loadProfileForm() {
     document.getElementById('pDob').value = profile.dob || '';
   }
 }
+async function changePassword() {
+  const np = document.getElementById('newPw').value;
+  const cp = document.getElementById('confirmPw').value;
+  const errEl = document.getElementById('errMsgPw');
+  const okEl = document.getElementById('successMsgPw');
+  errEl.classList.remove('show');
+  okEl.style.display = 'none';
 
+  if (np.length < 8) { errEl.textContent = 'Password must be at least 8 characters.'; errEl.classList.add('show'); return; }
+  if (np !== cp) { errEl.textContent = 'Passwords do not match.'; errEl.classList.add('show'); return; }
+
+  const { error } = await window.sb.auth.updateUser({ password: np });
+  if (error) { errEl.textContent = error.message; errEl.classList.add('show'); return; }
+
+  okEl.textContent = '✓ Password updated successfully!';
+  okEl.style.display = 'block';
+  document.getElementById('newPw').value = '';
+  document.getElementById('confirmPw').value = '';
+  setTimeout(() => okEl.style.display = 'none', 3000);
+}
 async function saveProfile() {
   const name = document.getElementById('pName').value.trim();
   const phone = document.getElementById('pPhone').value.trim();

@@ -44,6 +44,20 @@
   <script src="supabase.js"></script>
   <script src="loader.js"></script>
   <script>
+    // Check Supabase puts #access_token in URL after clicking reset link
+document.addEventListener('DOMContentLoaded', async () => {
+  await initSupabase();
+
+  const hash = window.location.hash;
+  const hasToken = hash.includes('access_token') || hash.includes('type=recovery');
+
+  if (!hasToken) {
+    // Not arrived via a reset link — redirect to forgot page
+    window.location.href = '/forgot';
+    return;
+  }
+});
+
     async function doReset() {
       const np = document.getElementById('newPass').value;
       const cp = document.getElementById('confirmPass').value;
