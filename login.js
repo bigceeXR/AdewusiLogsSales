@@ -1,5 +1,3 @@
-// login.js
-
 async function doLogin() {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
@@ -10,13 +8,22 @@ async function doLogin() {
   const btn = document.querySelector('#step1 .btn-primary');
   const reset = btnLoad(btn, 'Signing in...');
 
-  await initSupabase();
-  const { error } = await window.sb.auth.signInWithPassword({ email, password });
+  try {
+    await initSupabase();
+    const { error } = await window.sb.auth.signInWithPassword({ email, password });
 
-  if (error) { reset(); return showErr('errMsg', error.message); }
+    if (error) {
+      reset();
+      return showErr('errMsg', error.message);
+    }
 
-  const params = new URLSearchParams(window.location.search);
-  window.location.href = params.get('redirect') || '/';
+    const params = new URLSearchParams(window.location.search);
+    window.location.href = params.get('redirect') || '/';
+
+  } catch (err) {
+    reset();
+    showErr('errMsg', 'Something went wrong. Please try again.');
+  }
 }
 
 function showErr(id, msg) {
