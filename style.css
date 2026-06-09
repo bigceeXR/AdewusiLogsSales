@@ -199,6 +199,25 @@ input, select, textarea { font-family: var(--font); }
 .footer .container { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 0.83rem; }
 
 /* ===== RESPONSIVE ===== */
+.whatsapp-btn {
+  position: fixed;
+  bottom: 28px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  background: #229ed9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(34,158,217,0.4);
+  z-index: 999;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.whatsapp-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 28px rgba(34,158,217,0.5);
+}
 
 /* Prevent horizontal overflow on ALL screens */
 html, body { overflow-x: hidden; width: 100%; }
