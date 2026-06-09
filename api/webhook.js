@@ -1,86 +1,102 @@
-// api/webhook.js
-// Paystack calls this after every payment
-// Verifies signature, records purchase, assigns credentials
+// api/webhook.js — Node.js runtime, uses fetch REST instead of supabase npm
+export const config = { runtime: 'nodejs' };
 
-import { createClient } from '@supabase/supabase-js';
 import { createHmac } from 'crypto';
 
-export const config = { runtime: 'nodejs' }; // needs crypto — use nodejs runtime
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).send('Method not allowed');
 
-export default async function handler(req) {
-  if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  const body = await req.text();
-  const signature = req.headers.get('x-paystack-signature');
+  // Read raw body for signature verification
+  const body = JSON.stringify(req.body);
+  const signature = req.headers['x-paystack-signature'];
 
-  // Verify the request is genuinely from Paystack
+  // Verify request is genuinely from Paystack
   const hash = createHmac('sha512', process.env.PAYSTACK_SECRET_KEY)
     .update(body)
     .digest('hex');
 
   if (hash !== signature) {
-    return new Response('Invalid signature', { status: 401 });
+    return res.status(401).send('Invalid signature');
   }
 
-  const event = JSON.parse(body);
+  const event = req.body;
 
   // Only handle successful charges
   if (event.event !== 'charge.success') {
-    return new Response('OK', { status: 200 });
+    return res.status(200).send('OK');
   }
 
-  const { reference, amount, customer } = event.data;
+  const { reference, amount } = event.data;
 
-  const sb = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
+  // Helper: Supabase REST fetch
+  async function sbGet(path) {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` }
+    });
+    return r.json();
+  }
 
-  // Get the pending order we saved during initiation
-  const { data: order, error: orderErr } = await sb
-    .from('pending_orders')
-    .select('*')
-    .eq('ref', reference)
-    .single();
+  async function sbPost(path, data) {
+    return fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SERVICE_KEY,
+        'Authorization': `Bearer ${SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(data)
+    });
+  }
 
-  if (orderErr || !order) {
+  async function sbPatch(path, data) {
+    return fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SERVICE_KEY,
+        'Authorization': `Bearer ${SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(data)
+    });
+  }
+
+  // Get pending order
+  const orders = await sbGet(`pending_orders?ref=eq.${reference}&select=*`);
+  const order = orders?.[0];
+
+  if (!order) {
     console.error('Order not found for ref:', reference);
-    return new Response('Order not found', { status: 404 });
+    return res.status(404).send('Order not found');
   }
 
-  // Verify amount matches what we calculated server-side
+  // Verify amount matches
   if (order.amount_kobo !== amount) {
     console.error(`Amount mismatch! Expected ${order.amount_kobo}, got ${amount}`);
-    return new Response('Amount mismatch', { status: 400 });
+    return res.status(400).send('Amount mismatch');
   }
 
-  // Check not already processed (prevent duplicate webhook calls)
-  const { data: existing } = await sb
-    .from('purchases')
-    .select('id')
-    .eq('paystack_ref', reference)
-    .single();
+  // Check not already processed
+  const existing = await sbGet(`purchases?paystack_ref=eq.${reference}&select=id&limit=1`);
+  if (existing?.length > 0) return res.status(200).send('Already processed');
 
-  if (existing) {
-    return new Response('Already processed', { status: 200 });
-  }
-
-  // Process each item in the cart
-  const cart = JSON.parse(order.cart);
+  // Process each cart item
+  const cart = Array.isArray(order.cart) ? order.cart : JSON.parse(order.cart);
 
   for (const item of cart) {
     // Find unsold credential
-    const { data: cred } = await sb
-      .from('account_credentials')
-      .select('id')
-      .eq('account_id', item.id)
-      .eq('is_sold', false)
-      .limit(1)
-      .single();
+    const creds = await sbGet(
+      `account_credentials?account_id=eq.${item.id}&is_sold=eq.false&select=id&limit=1`
+    );
+    const cred = creds?.[0];
 
-    // Record purchase
+    // Insert purchase rows
     for (let q = 0; q < item.qty; q++) {
-      await sb.from('purchases').insert({
+      await sbPost('purchases', {
         user_id: order.user_id,
         account_id: item.id,
         credential_id: cred?.id || null,
@@ -93,22 +109,20 @@ export default async function handler(req) {
 
     // Mark credential as sold
     if (cred) {
-      await sb.from('account_credentials')
-        .update({ is_sold: true })
-        .eq('id', cred.id);
+      await sbPatch(`account_credentials?id=eq.${cred.id}`, { is_sold: true });
     }
 
     // Reduce stock
-    await sb.from('accounts')
-      .update({ quantity_available: sb.rpc('greatest', { a: 0, b: item.qty }) })
-      .eq('id', item.id);
+    const accts = await sbGet(`accounts?id=eq.${item.id}&select=quantity_available`);
+    const current = accts?.[0]?.quantity_available || 0;
+    await sbPatch(`accounts?id=eq.${item.id}`, {
+      quantity_available: Math.max(0, current - item.qty)
+    });
   }
 
-  // Mark order as completed
-  await sb.from('pending_orders')
-    .update({ is_completed: true })
-    .eq('ref', reference);
+  // Mark order complete
+  await sbPatch(`pending_orders?ref=eq.${reference}`, { is_completed: true });
 
   console.log('Purchase recorded for ref:', reference);
-  return new Response('OK', { status: 200 });
+  return res.status(200).send('OK');
 }
