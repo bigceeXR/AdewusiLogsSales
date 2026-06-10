@@ -1,4 +1,4 @@
-// api/initiate-payment.js — Node.js runtime, no npm imports needed
+// api/initiate-payment.js
 export const config = { runtime: 'nodejs' };
 
 export default async function handler(req, res) {
@@ -7,19 +7,32 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { cart, userId, email } = req.body;
+    // Manually parse body if needed
+    let body = req.body;
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch { body = {}; }
+    }
 
-    if (!cart || !userId || !email) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    const { cart, userId, email } = body || {};
+
+    if (!cart || !Array.isArray(cart) || !userId || !email) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        received: { cart: !!cart, userId: !!userId, email: !!email }
+      });
     }
 
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    // Fetch real prices from Supabase via REST API directly
-    const ids = cart.map(i => `id=eq.${i.id}`).join('&');
+    if (!SUPABASE_URL || !SERVICE_KEY) {
+      return res.status(500).json({ error: 'Server config missing' });
+    }
+
+    // Fetch real prices — use `in` filter syntax for multiple ids
+    const ids = cart.map(i => i.id).join(',');
     const dbRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/accounts?${ids}&select=id,price_ngn,quantity_available,platform`,
+      `${SUPABASE_URL}/rest/v1/accounts?id=in.(${ids})&select=id,price_ngn,quantity_available,platform`,
       {
         headers: {
           'apikey': SERVICE_KEY,
@@ -30,17 +43,17 @@ export default async function handler(req, res) {
 
     const accounts = await dbRes.json();
 
-    if (!accounts || !Array.isArray(accounts)) {
-      return res.status(500).json({ error: 'Could not verify prices' });
+    if (!Array.isArray(accounts)) {
+      return res.status(500).json({ error: 'Could not verify prices', detail: accounts });
     }
 
-    // Calculate server-side total
+    // Calculate server-side total — browser prices are ignored
     let totalKobo = 0;
     const verifiedItems = [];
 
     for (const cartItem of cart) {
       const dbItem = accounts.find(a => a.id === cartItem.id);
-      if (!dbItem) return res.status(400).json({ error: `Account not found` });
+      if (!dbItem) return res.status(400).json({ error: `Account not found: ${cartItem.id}` });
       if (dbItem.quantity_available < cartItem.qty) {
         return res.status(400).json({ error: `Not enough stock for ${dbItem.platform}` });
       }
@@ -51,8 +64,8 @@ export default async function handler(req, res) {
     // Generate unique reference
     const ref = 'PL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6).toUpperCase();
 
-    // Save pending order via Supabase REST
-    await fetch(`${SUPABASE_URL}/rest/v1/pending_orders`, {
+    // Save pending order
+    const orderRes = await fetch(`${SUPABASE_URL}/rest/v1/pending_orders`, {
       method: 'POST',
       headers: {
         'apikey': SERVICE_KEY,
@@ -68,6 +81,11 @@ export default async function handler(req, res) {
         cart: verifiedItems
       })
     });
+
+    if (!orderRes.ok) {
+      const detail = await orderRes.text();
+      return res.status(500).json({ error: 'Could not save order', detail });
+    }
 
     return res.status(200).json({
       ref,
