@@ -24,32 +24,8 @@
 }
 body { font-family: var(--font); background: var(--gray-50); color: var(--gray-900); min-height: 100vh; }
 
-/* 1. Base Typography (Now includes buttons!) */
-a { 
-  text-decoration: none; 
-  color: inherit; 
-}
-button, input, select, textarea { 
-  font-family: inherit; /* 'inherit' is usually safer than var(--font) here */
-  font-size: 100%; 
-}
-
-/* 2. Mobile Tap Highlights */
-a, button { 
-  -webkit-tap-highlight-color: transparent; 
-  tap-highlight-color: transparent; 
-}
-
-/* 3. Accessible Focus States */
-a:focus, button:focus { 
-  outline: none; /* Removes default browser ring */
-}
-/* ADD THIS: Restores the focus ring ONLY for keyboard users, keeping mouse users happy */
-a:focus-visible, button:focus-visible { 
-  outline: 2px solid var(--orange); /* Change to your brand color */
-  outline-offset: 2px;
-}
-
+a, button { -webkit-tap-highlight-color: transparent; tap-highlight-color: transparent; }
+a:focus, button:focus { outline: none; }
 /* ===== UTILITIES ===== */
 .container { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
 .btn-primary {
