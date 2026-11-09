@@ -23,9 +23,9 @@
   --font2: 'Sora', sans-serif;
 }
 body { font-family: var(--font); background: var(--gray-50); color: var(--gray-900); min-height: 100vh; }
-a { text-decoration: none; color: inherit; }
-input, select, textarea { font-family: var(--font); }
 
+a, button { -webkit-tap-highlight-color: transparent; tap-highlight-color: transparent; }
+a:focus, button:focus { outline: none; }
 /* ===== UTILITIES ===== */
 .container { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
 .btn-primary {
