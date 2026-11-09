@@ -17,10 +17,22 @@ export default async function handler(req, res) {
         }
 
         // 2. Fetch authoritative price from Supabase table
+        // Fetch country-specific price from Supabase table
         const dbRes = await fetch(
-            `${SUPABASE_URL}/rest/v1/service_prices?id=eq.${service_id}&select=price_ngn,service_name,server_id`,
-            { headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` } }
+            `${SUPABASE_URL}/rest/v1/number_country_prices?service_id=eq.${service_id}&country_id=eq.${country_id}&select=price_ngn`,
+            {
+                headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` }
+            }
         );
+        const rows = await dbRes.json();
+        const priceItem = rows?.[0];
+
+        const exactPriceNgn = priceItem ? priceItem.price_ngn : 2500; // Fallback price
+        const expectedAmountKobo = Math.round(Number(exactPriceNgn) * 100);
+
+        if (paystackData.data.amount < expectedAmountKobo) {
+            return res.status(400).json({ success: false, error: 'Paid amount does not match country price' });
+        }
         const [serviceItem] = await dbRes.json();
 
         if (!serviceItem) return res.status(400).json({ error: 'Invalid service selected' });
