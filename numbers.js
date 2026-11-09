@@ -95,7 +95,11 @@ async function fetchServicesFromSupabase() {
             }
         });
 
-        const countriesPromise = fetch(`https://xclusiveplugs.com/api/v1/numbers/countries?server=${TARGET_SERVER}`, {
+        // Change this line:
+        // const countriesPromise = fetch(`https://xclusiveplugs.com/api/v1/numbers/countries?server=${TARGET_SERVER}`, ...);
+
+        // To this (calls your secure Vercel backend proxy):
+        const countriesPromise = fetch(`/api/get-countries?server=${TARGET_SERVER}`, {
             headers: { 'Accept': 'application/json' }
         }).catch(() => null);
 
