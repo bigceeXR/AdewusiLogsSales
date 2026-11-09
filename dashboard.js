@@ -23,7 +23,7 @@ function showTab(name, el) {
   document.getElementById('tab-profile').style.display = name === 'profile' ? 'block' : 'none';
 }
 
-const ICONS = { Facebook:'📘', Instagram:'📸', TikTok:'🎵', 'Twitter/X':'🐦', YouTube:'▶️', Snapchat:'👻', LinkedIn:'💼', Pinterest:'📌' };
+const ICONS = { Facebook: '📘', Instagram: '📸', TikTok: '🎵', 'Twitter/X': '🐦', YouTube: '▶️', Snapchat: '👻', LinkedIn: '💼', Pinterest: '📌' };
 
 async function loadPurchases() {
   const el = document.getElementById('purchasesContent');
@@ -68,6 +68,21 @@ async function loadPurchases() {
         <span>📅 ${new Date(p.purchased_at).toLocaleDateString()}</span>
       </div>
 
+${isNumber ? `
+  <div style="background:#0f172a;padding:14px;border-radius:10px;color:#fff;margin-top:10px;">
+    <div style="font-size:0.75rem;color:#94a3b8;margin-bottom:4px;">VIRTUAL SMS LINE:</div>
+    <div style="font-size:1.3rem;font-weight:800;letter-spacing:1px;color:#4ade80;margin-bottom:10px;">${p.metadata?.phone_number || 'Active Line'}</div>
+    
+    <div id="otpBox_${p.id}" style="background:rgba(255,255,255,0.05);padding:10px;border-radius:8px;font-size:0.9rem;margin-bottom:10px;">
+      <span style="color:#cbd5e1;">Status:</span> <strong style="color:#fbbf24;">Waiting for SMS / OTP...</strong>
+    </div>
+
+    <button class="btn-primary" style="font-size:0.8rem;padding:8px 12px;width:100%;background:#3b82f6;" onclick="checkSmsOtp('${p.metadata?.order_id}', 'otpBox_${p.id}')">
+      🔄 Check for Incoming OTP
+    </button>
+  </div>
+` : ''}
+
       ${p.is_completed && p.account_credentials ? `
         <button class="reveal-btn" onclick="toggleCred('cred_${i}', this)">
           🔑 View Credentials
@@ -76,9 +91,9 @@ async function loadPurchases() {
           <div><strong>Login:</strong> ${p.account_credentials.login_email_or_phone}</div>
           <div><strong>Password:</strong> <code style="background:rgba(26,107,255,0.1);padding:2px 6px;border-radius:4px">${p.account_credentials.password}</code></div>
           ${p.account_credentials.two_factor_code
-            ? `<div><strong>2FA Code:</strong> ${p.account_credentials.two_factor_code}</div>` : ''}
+        ? `<div><strong>2FA Code:</strong> ${p.account_credentials.two_factor_code}</div>` : ''}
           ${p.account_credentials.two_factor_host
-            ? `<div><strong>2FA Host:</strong> ${p.account_credentials.two_factor_host}</div>` : ''}
+        ? `<div><strong>2FA Host:</strong> ${p.account_credentials.two_factor_host}</div>` : ''}
         </div>
       ` : p.is_completed ? `
         <p style="font-size:0.82rem;color:var(--gray-500);margin:0">
@@ -109,6 +124,35 @@ async function loadProfileForm() {
     document.getElementById('pName').value = profile.full_name || '';
     document.getElementById('pPhone').value = profile.phone || '';
     document.getElementById('pDob').value = profile.dob || '';
+  }
+}
+async function checkSmsOtp(orderId, elementId) {
+  const box = document.getElementById(elementId);
+  if (!box) return;
+
+  box.innerHTML = `<span style="color:#94a3b8;">Checking Server 4 for messages...</span>`;
+
+  try {
+    const res = await fetch('/api/get-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order_id: orderId })
+    });
+
+    const data = await res.json();
+
+    if (data.success && data.sms) {
+      box.innerHTML = `
+        <div style="color:#4ade80;font-weight:bold;font-size:1.05rem;">✓ Code Received:</div>
+        <div style="background:#1e293b;padding:8px;border-radius:6px;margin-top:4px;font-family:monospace;font-size:1.1rem;color:#fff;">${data.sms}</div>
+      `;
+    } else {
+      box.innerHTML = `
+        <span style="color:#fbbf24;">⏳ No message yet. Request the OTP from your app/website and check again in a few seconds.</span>
+      `;
+    }
+  } catch (err) {
+    box.innerHTML = `<span style="color:#ef4444;">Error checking OTP. Try again.</span>`;
   }
 }
 async function changePassword() {
