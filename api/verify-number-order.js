@@ -5,11 +5,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
-  // Frontend sends friendly slugs like country_id: "us", service_id: "whatsapp"
   const { reference, service_id, country_id, server, user_id } = req.body;
 
   if (!reference || !service_id || !country_id || !user_id) {
-    return res.status(400).json({ success: false, error: 'Missing required order parameters' });
+    return res.status(400).json({ success: false, error: 'Missing required parameters' });
   }
 
   const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -28,7 +27,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: 'Payment verification failed' });
     }
 
-    // 2. Fetch custom retail price from your Supabase table
+    // 2. Fetch custom retail price from Supabase
     const dbRes = await fetch(
       `${SUPABASE_URL}/rest/v1/number_country_prices?service_id=eq.${service_id}&country_id=eq.${country_id}&select=price_ngn`,
       { headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` } }
@@ -45,7 +44,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: 'Paid amount does not match database price' });
     }
 
-    // 3. FETCH LIVE SERVER 4 MAPPINGS DYNAMICALLY
+    // 3. FETCH LIVE SERVER 4 DATA
     const [countriesRes, servicesRes] = await Promise.all([
       fetch('https://xclusiveplugs.com/api/v1/numbers/countries?server=4', {
         headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${XCLUSIVEPLUGS_KEY}` }
@@ -55,42 +54,66 @@ export default async function handler(req, res) {
       })
     ]);
 
-    const countriesData = await countriesRes.json();
-    const servicesData = await servicesRes.json();
+    const countriesJson = await countriesRes.json();
+    const servicesJson = await servicesRes.json();
 
-    const targetCountry = String(country_id).trim().toLowerCase();
-    const targetService = String(service_id).trim().toLowerCase();
-
-    // Universal helper: Checks if ANY property in the object matches your target string
-    const matchAnyProperty = (item, target) => {
-      if (!item || typeof item !== 'object') return false;
-      return Object.values(item).some(val => {
-        if (val === null || val === undefined) return false;
-        const valStr = String(val).toLowerCase();
-        return valStr === target || valStr.includes(target);
-      });
+    const extractArray = (obj) => {
+      if (Array.isArray(obj)) return obj;
+      if (Array.isArray(obj?.data)) return obj.data;
+      if (Array.isArray(obj?.result)) return obj.result;
+      return Object.values(obj || {}).find(v => Array.isArray(v)) || [];
     };
 
-    const countriesList = Array.isArray(countriesData.data) ? countriesData.data : (countriesData.result || []);
-    const servicesList = Array.isArray(servicesData.data) ? servicesData.data : (servicesData.result || []);
+    const countriesList = extractArray(countriesJson);
+    const servicesList = extractArray(servicesJson);
 
-    const matchedCountry = countriesList.find(c => matchAnyProperty(c, targetCountry));
-    const matchedService = servicesList.find(s => matchAnyProperty(s, targetService));
+    // Normalizer to strip spaces, symbols, and parentheses (e.g. "USA (1)" -> "usa")
+    const normalize = (str) => String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    const targetCountryInput = String(country_id).trim().toLowerCase();
+    const targetServiceInput = String(service_id).trim().toLowerCase();
+
+    // Define smart aliases for common countries to handle UK, USA, etc. perfectly
+    const countryAliases = {
+      'us': ['unitedstates', 'usa', 'us', 'america'],
+      'usa': ['unitedstates', 'usa', 'us', 'america'],
+      'united states': ['unitedstates', 'usa', 'us', 'america'],
+      'uk': ['unitedkingdom', 'uk', 'britain', 'greatbritain', 'england'],
+      'united kingdom': ['unitedkingdom', 'uk', 'britain', 'greatbritain', 'england'],
+      'ng': ['nigeria', 'ng'],
+      'nigeria': ['nigeria', 'ng'],
+      'ca': ['canada', 'ca'],
+      'canada': ['canada', 'ca']
+    };
+
+    const allowedCountryKeywords = countryAliases[targetCountryInput] || [normalize(targetCountryInput)];
+
+    // Find Country using smart matching
+    const matchedCountry = countriesList.find(c => {
+      const objValuesStr = Object.values(c).map(v => normalize(v)).join(' ');
+      return allowedCountryKeywords.some(keyword => objValuesStr.includes(keyword));
+    });
+
+    // Find Service using smart matching
+    const matchedService = servicesList.find(s => {
+      const objValuesStr = Object.values(s).map(v => normalize(v)).join(' ');
+      const normalizedTargetService = normalize(targetServiceInput);
+      return objValuesStr.includes(normalizedTargetService);
+    });
 
     if (!matchedCountry || !matchedService) {
-      console.error('Mapping failed. Countries received:', countriesList);
-      console.error('Services received:', servicesList);
+      console.error(`Smart mapping failed for Country: '${country_id}', Service: '${service_id}'`);
       return res.status(400).json({
         success: false,
-        error: `Universal mapping failed for country '${country_id}' or service '${service_id}'. Check Vercel logs.`
+        error: `Could not match country '${country_id}' or service '${service_id}' with Server 4 directory.`
       });
     }
 
-    // Extract the integer ID dynamically from whatever property holds it (id, country_id, service_id, etc.)
+    // Extract exact integer IDs dynamically from the matched objects
     const liveCountryIntId = parseInt(matchedCountry.id || matchedCountry.country_id || Object.values(matchedCountry).find(v => typeof v === 'number'), 10);
     const liveServiceIntId = parseInt(matchedService.id || matchedService.service_id || Object.values(matchedService).find(v => typeof v === 'number'), 10);
 
-    // 4. Place the order on Server 4 using their exact live integer IDs
+    // 4. Place order on Server 4
     const xclusiveRes = await fetch('https://xclusiveplugs.com/api/v1/numbers/orders', {
       method: 'POST',
       headers: {
@@ -118,7 +141,7 @@ export default async function handler(req, res) {
     const phoneNumber = xclusiveData.data.phone_number || xclusiveData.data.number;
     const orderId = xclusiveData.data.order_id || reference;
 
-    // 5. Save the completed order record to Supabase purchases table
+    // 5. Save record to Supabase purchases table
     await fetch(`${SUPABASE_URL}/rest/v1/purchases`, {
       method: 'POST',
       headers: {
