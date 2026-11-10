@@ -55,8 +55,8 @@ export default async function handler(req, res) {
 
     // Alias mapper for common country inputs (us, uk, ng, etc.)
     const countryAliases = {
-      'us': ['us', 'usa', 'united states', 'america'],
-      'usa': ['us', 'usa', 'united states', 'america'],
+      'us': ['us', 'usa(2)', 'united states', 'america'],
+      'usa': ['us', 'usa(2)', 'united states', 'america'],
       'uk': ['uk', 'united kingdom', 'britain', 'england'],
       'ng': ['ng', 'nigeria']
     };
