@@ -45,7 +45,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: 'Paid amount does not match database price' });
     }
 
-    // 3. FETCH LIVE SERVER 4 MAPPINGS DYNAMICALLY WITH LOGGING
+    // 3. FETCH LIVE SERVER 4 MAPPINGS DYNAMICALLY
     const [countriesRes, servicesRes] = await Promise.all([
       fetch('https://xclusiveplugs.com/api/v1/numbers/countries?server=4', {
         headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${XCLUSIVEPLUGS_KEY}` }
@@ -58,37 +58,37 @@ export default async function handler(req, res) {
     const countriesData = await countriesRes.json();
     const servicesData = await servicesRes.json();
 
-    // Log the raw responses to Vercel console so you can inspect their exact structure if needed
-    console.log('Server 4 Countries Sample:', countriesData.data?.[0]);
-    console.log('Server 4 Services Sample:', servicesData.data?.[0]);
-
     const targetCountry = String(country_id).trim().toLowerCase();
     const targetService = String(service_id).trim().toLowerCase();
 
-    // Flexible matching across all potential key names
-    const matchedCountry = countriesData.data?.find(c => {
-      const cId = String(c.id || '').toLowerCase();
-      const cCode = String(c.code || c.short || c.iso || '').toLowerCase();
-      const cName = String(c.name || '').toLowerCase();
-      return cId === targetCountry || cCode === targetCountry || cName.includes(targetCountry);
-    });
+    // Universal helper: Checks if ANY property in the object matches your target string
+    const matchAnyProperty = (item, target) => {
+      if (!item || typeof item !== 'object') return false;
+      return Object.values(item).some(val => {
+        if (val === null || val === undefined) return false;
+        const valStr = String(val).toLowerCase();
+        return valStr === target || valStr.includes(target);
+      });
+    };
 
-    const matchedService = servicesData.data?.find(s => {
-      const sId = String(s.id || s.service_id || '').toLowerCase();
-      const sCode = String(s.code || s.slug || '').toLowerCase();
-      const sName = String(s.name || s.service_name || '').toLowerCase();
-      return sId === targetService || sCode === targetService || sName.includes(targetService);
-    });
+    const countriesList = Array.isArray(countriesData.data) ? countriesData.data : (countriesData.result || []);
+    const servicesList = Array.isArray(servicesData.data) ? servicesData.data : (servicesData.result || []);
+
+    const matchedCountry = countriesList.find(c => matchAnyProperty(c, targetCountry));
+    const matchedService = servicesList.find(s => matchAnyProperty(s, targetService));
 
     if (!matchedCountry || !matchedService) {
+      console.error('Mapping failed. Countries received:', countriesList);
+      console.error('Services received:', servicesList);
       return res.status(400).json({
         success: false,
-        error: `Mapping failed for country '${country_id}' or service '${service_id}'. Check Vercel logs for raw Server 4 keys.`
+        error: `Universal mapping failed for country '${country_id}' or service '${service_id}'. Check Vercel logs.`
       });
     }
 
-    const liveCountryIntId = parseInt(matchedCountry.id || matchedCountry.country_id, 10);
-    const liveServiceIntId = parseInt(matchedService.id || matchedService.service_id, 10);
+    // Extract the integer ID dynamically from whatever property holds it (id, country_id, service_id, etc.)
+    const liveCountryIntId = parseInt(matchedCountry.id || matchedCountry.country_id || Object.values(matchedCountry).find(v => typeof v === 'number'), 10);
+    const liveServiceIntId = parseInt(matchedService.id || matchedService.service_id || Object.values(matchedService).find(v => typeof v === 'number'), 10);
 
     // 4. Place the order on Server 4 using their exact live integer IDs
     const xclusiveRes = await fetch('https://xclusiveplugs.com/api/v1/numbers/orders', {
