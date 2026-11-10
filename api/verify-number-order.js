@@ -45,13 +45,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: 'Paid amount does not match database price' });
     }
 
-    // 3. FETCH LIVE SERVER 4 MAPPINGS DYNAMICALLY
-    // This resolves whatever integer IDs Server 4 is currently using right now.
+    // 3. FETCH LIVE SERVER 4 MAPPINGS DYNAMICALLY WITH LOGGING
     const [countriesRes, servicesRes] = await Promise.all([
       fetch('https://xclusiveplugs.com/api/v1/numbers/countries?server=4', {
         headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${XCLUSIVEPLUGS_KEY}` }
       }),
-      fetch(`https://xclusiveplugs.com/api/v1/numbers/services?server=4`, {
+      fetch('https://xclusiveplugs.com/api/v1/numbers/services?server=4', {
         headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${XCLUSIVEPLUGS_KEY}` }
       })
     ]);
@@ -59,27 +58,37 @@ export default async function handler(req, res) {
     const countriesData = await countriesRes.json();
     const servicesData = await servicesRes.json();
 
-    // Find the current live integer ID for the requested country (e.g., matching "us" or "united states")
-    const matchedCountry = countriesData.data?.find(c =>
-      String(c.short || c.code || '').toLowerCase() === String(country_id).toLowerCase() ||
-      String(c.id) === String(country_id)
-    );
+    // Log the raw responses to Vercel console so you can inspect their exact structure if needed
+    console.log('Server 4 Countries Sample:', countriesData.data?.[0]);
+    console.log('Server 4 Services Sample:', servicesData.data?.[0]);
 
-    // Find the current live integer ID for the requested service (e.g., matching "whatsapp")
-    const matchedService = servicesData.data?.find(s =>
-      String(s.name || s.code || '').toLowerCase() === String(service_id).toLowerCase() ||
-      String(s.id) === String(service_id)
-    );
+    const targetCountry = String(country_id).trim().toLowerCase();
+    const targetService = String(service_id).trim().toLowerCase();
+
+    // Flexible matching across all potential key names
+    const matchedCountry = countriesData.data?.find(c => {
+      const cId = String(c.id || '').toLowerCase();
+      const cCode = String(c.code || c.short || c.iso || '').toLowerCase();
+      const cName = String(c.name || '').toLowerCase();
+      return cId === targetCountry || cCode === targetCountry || cName.includes(targetCountry);
+    });
+
+    const matchedService = servicesData.data?.find(s => {
+      const sId = String(s.id || s.service_id || '').toLowerCase();
+      const sCode = String(s.code || s.slug || '').toLowerCase();
+      const sName = String(s.name || s.service_name || '').toLowerCase();
+      return sId === targetService || sCode === targetService || sName.includes(targetService);
+    });
 
     if (!matchedCountry || !matchedService) {
       return res.status(400).json({
         success: false,
-        error: `Server 4 mapping failed: Could not resolve live integer IDs for country '${country_id}' or service '${service_id}'.`
+        error: `Mapping failed for country '${country_id}' or service '${service_id}'. Check Vercel logs for raw Server 4 keys.`
       });
     }
 
-    const liveCountryIntId = parseInt(matchedCountry.id, 10);
-    const liveServiceIntId = parseInt(matchedService.id, 10);
+    const liveCountryIntId = parseInt(matchedCountry.id || matchedCountry.country_id, 10);
+    const liveServiceIntId = parseInt(matchedService.id || matchedService.service_id, 10);
 
     // 4. Place the order on Server 4 using their exact live integer IDs
     const xclusiveRes = await fetch('https://xclusiveplugs.com/api/v1/numbers/orders', {
