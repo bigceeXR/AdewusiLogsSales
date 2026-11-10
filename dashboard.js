@@ -28,7 +28,87 @@ const ICONS = { Facebook: '📘', Instagram: '📸', TikTok: '🎵', 'Twitter/X'
 async function loadPurchases() {
   const el = document.getElementById('purchasesContent');
   const hidePurchasesLoader = pageLoad('Fetching your purchases...');
+  // Place inside loadPurchases() rendering loop in dashboard.js
 
+  const isNumber = !p.account_id && p.metadata?.phone_number;
+  const orderId = p.metadata?.order_id || p.paystack_ref;
+  const phoneNumber = p.metadata?.phone_number || 'Active Line';
+  const lineStatus = p.metadata?.status || 'active';
+
+  return `
+  <div style="background:#fff;border:1.5px solid var(--gray-100);border-radius:14px;padding:18px 20px;margin-bottom:16px;box-shadow:var(--shadow)">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:1.5rem">📱</span>
+        <div>
+          <div style="font-weight:800;font-size:0.98rem">${(p.metadata?.service_name || 'SMS Line').toUpperCase()}</div>
+          <div style="font-size:0.78rem;color:var(--gray-500)">Server 4 · Region: ${(p.metadata?.country_id || 'US').toUpperCase()}</div>
+        </div>
+      </div>
+      <span class="badge ${lineStatus === 'active' ? 'complete' : 'pending'}">
+        ${lineStatus.toUpperCase()}
+      </span>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--gray-700);margin-bottom:14px;">
+      <span>💰 ₦${parseFloat(p.total_paid).toLocaleString()}</span>
+      <span>📅 ${new Date(p.purchased_at).toLocaleDateString()}</span>
+    </div>
+
+    ${isNumber ? `
+      <div style="background:#0f172a;padding:16px;border-radius:10px;color:#fff;">
+        <div style="font-size:0.75rem;color:#94a3b8;margin-bottom:4px;">YOUR VIRTUAL SMS NUMBER:</div>
+        <div style="font-size:1.4rem;font-weight:800;letter-spacing:1px;color:#4ade80;margin-bottom:12px;">${phoneNumber}</div>
+        
+        <div id="otpBox_${i}" style="background:rgba(255,255,255,0.05);padding:12px;border-radius:8px;font-size:0.88rem;margin-bottom:12px;">
+          <span style="color:#cbd5e1;">Status:</span> <strong style="color:#fbbf24;">Waiting for incoming SMS/OTP...</strong>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button class="btn-primary" style="font-size:0.85rem;padding:10px;background:#3b82f6;" onclick="checkSmsOtp('${orderId}', 'otpBox_${i}')">
+            🔄 Check Incoming OTP
+          </button>
+          
+          <div style="display:flex;gap:8px;">
+            <button class="btn-outline" style="flex:1;font-size:0.78rem;padding:8px;color:#ef4444;border-color:#ef4444;" onclick="handleLineAction('${orderId}', '${p.id}', 'cancel')">
+              🚫 Cancel Number
+            </button>
+            <button class="btn-outline" style="flex:1;font-size:0.78rem;padding:8px;color:#eab308;border-color:#eab308;" onclick="handleLineAction('${orderId}', '${p.id}', 'report')">
+              ⚠️ Report Issue
+            </button>
+          </div>
+        </div>
+      </div>
+    ` : ''}
+  </div>
+`;
+
+  // Helper for cancelling or reporting issues with a line
+  async function handleLineAction(orderId, purchaseId, action) {
+    const confirmMsg = action === 'cancel'
+      ? 'Are you sure you want to cancel this virtual line?'
+      : 'Report issue with this number to Server 4?';
+
+    if (!confirm(confirmMsg)) return;
+
+    try {
+      const res = await fetch('/api/number-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, purchase_id: purchaseId, action })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert(data.message);
+        location.reload();
+      } else {
+        alert(data.error || 'Failed to perform action.');
+      }
+    } catch (err) {
+      alert('Network error submitting request.');
+    }
+  }
   const { data: purchases, error } = await window.sb
     .from('purchases')
     .select(`*, accounts(platform, country, followers), account_credentials(login_email_or_phone, password, two_factor_code, two_factor_host)`)
@@ -68,20 +148,7 @@ async function loadPurchases() {
         <span>📅 ${new Date(p.purchased_at).toLocaleDateString()}</span>
       </div>
 
-${isNumber ? `
-  <div style="background:#0f172a;padding:14px;border-radius:10px;color:#fff;margin-top:10px;">
-    <div style="font-size:0.75rem;color:#94a3b8;margin-bottom:4px;">VIRTUAL SMS LINE:</div>
-    <div style="font-size:1.3rem;font-weight:800;letter-spacing:1px;color:#4ade80;margin-bottom:10px;">${p.metadata?.phone_number || 'Active Line'}</div>
-    
-    <div id="otpBox_${p.id}" style="background:rgba(255,255,255,0.05);padding:10px;border-radius:8px;font-size:0.9rem;margin-bottom:10px;">
-      <span style="color:#cbd5e1;">Status:</span> <strong style="color:#fbbf24;">Waiting for SMS / OTP...</strong>
-    </div>
 
-    <button class="btn-primary" style="font-size:0.8rem;padding:8px 12px;width:100%;background:#3b82f6;" onclick="checkSmsOtp('${p.metadata?.order_id}', 'otpBox_${p.id}')">
-      🔄 Check for Incoming OTP
-    </button>
-  </div>
-` : ''}
 
       ${p.is_completed && p.account_credentials ? `
         <button class="reveal-btn" onclick="toggleCred('cred_${i}', this)">
