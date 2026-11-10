@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
-  const { reference, service_id, country_id, server, user_id } = req.body;
+  const { reference, service_id, country_id, user_id } = req.body;
 
   if (!reference || !service_id || !country_id || !user_id) {
     return res.status(400).json({ success: false, error: 'Missing required parameters' });
@@ -44,76 +44,61 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: 'Paid amount does not match database price' });
     }
 
-    // 3. FETCH LIVE SERVER 4 DATA
-    const [countriesRes, servicesRes] = await Promise.all([
-      fetch('https://xclusiveplugs.com/api/v1/numbers/countries?server=4', {
-        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${XCLUSIVEPLUGS_KEY}` }
-      }),
-      fetch('https://xclusiveplugs.com/api/v1/numbers/services?server=4', {
-        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${XCLUSIVEPLUGS_KEY}` }
-      })
-    ]);
-
+    // 3. STEP A: Fetch Countries from XclusivePlugs
+    const countriesRes = await fetch('https://xclusiveplugs.com/api/v1/numbers/countries', {
+      headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${XCLUSIVEPLUGS_KEY}` }
+    });
     const countriesJson = await countriesRes.json();
-    const servicesJson = await servicesRes.json();
-
-    const extractArray = (obj) => {
-      if (Array.isArray(obj)) return obj;
-      if (Array.isArray(obj?.data)) return obj.data;
-      if (Array.isArray(obj?.result)) return obj.result;
-      return Object.values(obj || {}).find(v => Array.isArray(v)) || [];
-    };
-
-    const countriesList = extractArray(countriesJson);
-    const servicesList = extractArray(servicesJson);
-
-    // Normalizer to strip spaces, symbols, and parentheses (e.g. "USA (1)" -> "usa")
-    const normalize = (str) => String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const countriesList = countriesJson.data || [];
 
     const targetCountryInput = String(country_id).trim().toLowerCase();
-    const targetServiceInput = String(service_id).trim().toLowerCase();
 
-    // Define smart aliases for common countries to handle UK, USA, etc. perfectly
+    // Alias mapper for common country inputs (us, uk, ng, etc.)
     const countryAliases = {
-      'us': ['unitedstates', 'usa', 'us', 'america'],
-      'usa': ['unitedstates', 'usa', 'us', 'america'],
-      'united states': ['unitedstates', 'usa', 'us', 'america'],
-      'uk': ['unitedkingdom', 'uk', 'britain', 'greatbritain', 'england'],
-      'united kingdom': ['unitedkingdom', 'uk', 'britain', 'greatbritain', 'england'],
-      'ng': ['nigeria', 'ng'],
-      'nigeria': ['nigeria', 'ng'],
-      'ca': ['canada', 'ca'],
-      'canada': ['canada', 'ca']
+      'us': ['us', 'usa', 'united states', 'america'],
+      'usa': ['us', 'usa', 'united states', 'america'],
+      'uk': ['uk', 'united kingdom', 'britain', 'england'],
+      'ng': ['ng', 'nigeria']
     };
+    const allowedCountryKeywords = countryAliases[targetCountryInput] || [targetCountryInput];
 
-    const allowedCountryKeywords = countryAliases[targetCountryInput] || [normalize(targetCountryInput)];
-
-    // Find Country using smart matching
+    // Find the country object
     const matchedCountry = countriesList.find(c => {
-      const objValuesStr = Object.values(c).map(v => normalize(v)).join(' ');
-      return allowedCountryKeywords.some(keyword => objValuesStr.includes(keyword));
+      const shortCode = String(c.short || '').toLowerCase();
+      const name = String(c.name || '').toLowerCase();
+      return allowedCountryKeywords.some(kw => shortCode === kw || name.includes(kw));
     });
 
-    // Find Service using smart matching
-    const matchedService = servicesList.find(s => {
-      const objValuesStr = Object.values(s).map(v => normalize(v)).join(' ');
-      const normalizedTargetService = normalize(targetServiceInput);
-      return objValuesStr.includes(normalizedTargetService);
-    });
-
-    if (!matchedCountry || !matchedService) {
-      console.error(`Smart mapping failed for Country: '${country_id}', Service: '${service_id}'`);
-      return res.status(400).json({
-        success: false,
-        error: `Could not match country '${country_id}' or service '${service_id}' with Server 4 directory.`
-      });
+    if (!matchedCountry) {
+      return res.status(400).json({ success: false, error: `Could not match country '${country_id}' with XclusivePlugs catalog.` });
     }
 
-    // Extract exact integer IDs dynamically from the matched objects
-    const liveCountryIntId = parseInt(matchedCountry.id || matchedCountry.country_id || Object.values(matchedCountry).find(v => typeof v === 'number'), 10);
-    const liveServiceIntId = parseInt(matchedService.id || matchedService.service_id || Object.values(matchedService).find(v => typeof v === 'number'), 10);
+    const liveCountryId = matchedCountry.id; // e.g., "1"
 
-    // 4. Place order on Server 4
+    // 3. STEP B: Fetch Services for THIS specific country ID
+    const servicesRes = await fetch(`https://xclusiveplugs.com/api/v1/numbers/services?country_id=${liveCountryId}`, {
+      headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${XCLUSIVEPLUGS_KEY}` }
+    });
+    const servicesJson = await servicesRes.json();
+    const servicesList = servicesJson.data || [];
+
+    const targetServiceInput = String(service_id).trim().toLowerCase();
+
+    // Find the service object by matching name or ID
+    const matchedService = servicesList.find(s => {
+      const sName = String(s.service_name || s.name || '').toLowerCase();
+      const sId = String(s.service_id || s.id || '').toLowerCase();
+      return sName.includes(targetServiceInput) || sId === targetServiceInput;
+    });
+
+    if (!matchedService) {
+      return res.status(400).json({ success: false, error: `Service '${service_id}' is currently unavailable for ${matchedCountry.name}.` });
+    }
+
+    const liveServiceId = matchedService.service_id || matchedService.id;
+
+    // 4. Place order on XclusivePlugs Server
+    const idempotencyKey = 'order_' + reference;
     const xclusiveRes = await fetch('https://xclusiveplugs.com/api/v1/numbers/orders', {
       method: 'POST',
       headers: {
@@ -122,10 +107,9 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${XCLUSIVEPLUGS_KEY}`
       },
       body: JSON.stringify({
-        service_id: liveServiceIntId,
-        country_id: liveCountryIntId,
-        server: server || 4,
-        idempotency_key: 'order_' + reference
+        country_id: Number(liveCountryId),
+        service_id: Number(liveServiceId),
+        idempotency_key: idempotencyKey
       })
     });
 
@@ -134,7 +118,7 @@ export default async function handler(req, res) {
     if (!xclusiveRes.ok || !xclusiveData.success) {
       return res.status(400).json({
         success: false,
-        error: xclusiveData.message || 'Server 4 is out of stock for this configuration'
+        error: xclusiveData.message || 'Server is out of stock for this configuration'
       });
     }
 
