@@ -5,10 +5,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
+  // Frontend sends friendly slugs like country_id: "us", service_id: "whatsapp"
   const { reference, service_id, country_id, server, user_id } = req.body;
 
   if (!reference || !service_id || !country_id || !user_id) {
-    return res.status(400).json({ success: false, error: 'Missing required parameters' });
+    return res.status(400).json({ success: false, error: 'Missing required order parameters' });
   }
 
   const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -27,14 +28,14 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: 'Payment verification failed' });
     }
 
-    // 2. Fetch price directly from number_country_prices table
+    // 2. Fetch custom retail price from your Supabase table
     const dbRes = await fetch(
       `${SUPABASE_URL}/rest/v1/number_country_prices?service_id=eq.${service_id}&country_id=eq.${country_id}&select=price_ngn`,
       { headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` } }
     );
     const rows = await dbRes.json();
     if (!rows || rows.length === 0) {
-      return res.status(400).json({ success: false, error: 'Service/Country combination is not listed in database' });
+      return res.status(400).json({ success: false, error: 'Pricing rule not found in database' });
     }
 
     const priceNgn = Number(rows[0].price_ngn);
@@ -44,7 +45,43 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: 'Paid amount does not match database price' });
     }
 
-    // 3. Purchase Number from Server 4
+    // 3. FETCH LIVE SERVER 4 MAPPINGS DYNAMICALLY
+    // This resolves whatever integer IDs Server 4 is currently using right now.
+    const [countriesRes, servicesRes] = await Promise.all([
+      fetch('https://xclusiveplugs.com/api/v1/numbers/countries?server=4', {
+        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${XCLUSIVEPLUGS_KEY}` }
+      }),
+      fetch(`https://xclusiveplugs.com/api/v1/numbers/services?server=4`, {
+        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${XCLUSIVEPLUGS_KEY}` }
+      })
+    ]);
+
+    const countriesData = await countriesRes.json();
+    const servicesData = await servicesRes.json();
+
+    // Find the current live integer ID for the requested country (e.g., matching "us" or "united states")
+    const matchedCountry = countriesData.data?.find(c =>
+      String(c.short || c.code || '').toLowerCase() === String(country_id).toLowerCase() ||
+      String(c.id) === String(country_id)
+    );
+
+    // Find the current live integer ID for the requested service (e.g., matching "whatsapp")
+    const matchedService = servicesData.data?.find(s =>
+      String(s.name || s.code || '').toLowerCase() === String(service_id).toLowerCase() ||
+      String(s.id) === String(service_id)
+    );
+
+    if (!matchedCountry || !matchedService) {
+      return res.status(400).json({
+        success: false,
+        error: `Server 4 mapping failed: Could not resolve live integer IDs for country '${country_id}' or service '${service_id}'.`
+      });
+    }
+
+    const liveCountryIntId = parseInt(matchedCountry.id, 10);
+    const liveServiceIntId = parseInt(matchedService.id, 10);
+
+    // 4. Place the order on Server 4 using their exact live integer IDs
     const xclusiveRes = await fetch('https://xclusiveplugs.com/api/v1/numbers/orders', {
       method: 'POST',
       headers: {
@@ -53,8 +90,8 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${XCLUSIVEPLUGS_KEY}`
       },
       body: JSON.stringify({
-        service_id,
-        country_id,
+        service_id: liveServiceIntId,
+        country_id: liveCountryIntId,
         server: server || 4,
         idempotency_key: 'order_' + reference
       })
@@ -65,14 +102,14 @@ export default async function handler(req, res) {
     if (!xclusiveRes.ok || !xclusiveData.success) {
       return res.status(400).json({
         success: false,
-        error: xclusiveData.message || 'Server 4 is currently out of stock for this line'
+        error: xclusiveData.message || 'Server 4 is out of stock for this configuration'
       });
     }
 
     const phoneNumber = xclusiveData.data.phone_number || xclusiveData.data.number;
     const orderId = xclusiveData.data.order_id || reference;
 
-    // 4. Save record to Supabase purchases table
+    // 5. Save the completed order record to Supabase purchases table
     await fetch(`${SUPABASE_URL}/rest/v1/purchases`, {
       method: 'POST',
       headers: {
@@ -104,7 +141,7 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    console.error('Provisioning error:', err);
-    return res.status(500).json({ success: false, error: 'Internal server error processing purchase' });
+    console.error('Order processing error:', err);
+    return res.status(500).json({ success: false, error: 'Internal server error during order fulfillment' });
   }
 }
